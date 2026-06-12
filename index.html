@@ -542,6 +542,43 @@ main{flex:1;padding:26px 32px 60px;max-width:1700px;margin:0 auto;width:100%}
   .profiles-grid{grid-template-columns:1fr}
 }
 </style>
+
+<script>
+// Ранняя инициализация login — доступна сразу при загрузке страницы
+function doLogin(){
+  var u=document.getElementById('l-user').value.trim();
+  var p=document.getElementById('l-pass').value;
+  if(u==='maximussales'&&p==='Maximus2025'){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='flex';
+    var ph=document.getElementById('page-home');
+    if(ph){ph.innerHTML='<div style="text-align:center;padding:80px 20px;color:#4e6a8a"><div style="margin:0 auto 20px;width:32px;height:32px;border:3px solid rgba(45,140,255,0.2);border-top-color:#2d8cff;border-radius:50%;animation:spin .7s linear infinite"></div><div style="font-size:14px">Загружаем данные...</div></div>';}
+    document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+    if(ph) ph.classList.add('active');
+    // Вызываем основную логику после загрузки
+    setTimeout(function(){
+      if(typeof DB !== 'undefined'){
+        Promise.all([DB.loadData(), DB.loadProfiles()]).then(function(res){
+          var cloudData=res[0], profiles=res[1];
+          if(cloudData&&cloudData.data) APP.data=cloudData.data;
+          else { try{var s=localStorage.getItem('mx_data');if(s){var d=JSON.parse(s);if(d&&d.shops&&d.shops.length>0)APP.data=d;}}catch(e){} }
+          APP.profiles=profiles||{};
+          if(typeof updateLastUploadInfo==='function') updateLastUploadInfo();
+          if(typeof renderAll==='function') renderAll();
+        }).catch(function(){
+          try{var s=localStorage.getItem('mx_data');if(s){var d=JSON.parse(s);if(d&&d.shops)APP.data=d;}}catch(e){}
+          if(typeof renderAll==='function') renderAll();
+        });
+      } else if(typeof renderAll==='function'){
+        renderAll();
+      }
+    }, 100);
+  } else {
+    var err=document.getElementById('login-err');
+    if(err) err.textContent='Неверный логин или пароль';
+  }
+}
+</script>
 </head>
 <body>
 
@@ -560,8 +597,8 @@ main{flex:1;padding:26px 32px 60px;max-width:1700px;margin:0 auto;width:100%}
     </div>
     
     <input class="login-input" id="l-user" type="text" placeholder="Логин" autocomplete="username">
-    <input class="login-input" id="l-pass" type="password" placeholder="Пароль" autocomplete="current-password" id="l-pass-field">
-    <button class="login-btn" id="login-btn">Войти</button>
+    <input class="login-input" id="l-pass" type="password" placeholder="Пароль" onkeydown="if(event.key==='Enter')doLogin()" autocomplete="current-password" id="l-pass-field">
+    <button class="login-btn" id="login-btn" onclick="doLogin()">Войти</button>
     <div class="login-err" id="login-err"></div>
   </div>
 </div>
@@ -871,48 +908,7 @@ function updateLastUploadInfo(){
   const sel=_id('sidebar-upload-info'); if(sel) sel.innerHTML=html;
 }
 
-function doLogin(){
-  const u=_id('l-user').value.trim(), p=_id('l-pass').value;
-  if(u==='maximussales'&&p==='Maximus2025'){
-    _id('login-screen').style.display='none';
-    _id('app').style.display='flex';
-    // Показываем лоадер пока грузим данные
-    _id('page-home').innerHTML='<div style="text-align:center;padding:80px 20px;color:var(--muted)"><div class="spinner" style="width:32px;height:32px;border-width:3px;margin:0 auto 20px"></div><div style="font-size:14px">Загружаем данные из облака...</div></div>';
-    _id('page-home').parentElement.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-    _id('page-home').classList.add('active');
 
-    // Загружаем из Supabase
-    Promise.all([DB.loadData(), DB.loadProfiles()]).then(([cloudData, profiles])=>{
-      if(cloudData && cloudData.data){
-        APP.data = cloudData.data;
-        APP.cloudLoaded = true;
-        // Обновляем время последней загрузки
-        if(cloudData.uploaded_at){
-          localStorage.setItem('mx_last_upload_ts', new Date(cloudData.uploaded_at).getTime().toString());
-        }
-      } else {
-        // Нет данных в облаке — пробуем localStorage
-        try {
-          const saved = localStorage.getItem('mx_data');
-          if(saved){ const parsed=JSON.parse(saved); if(parsed?.shops?.length>0) APP.data=parsed; }
-        } catch(e){}
-      }
-      APP.profiles = profiles || {};
-      updateLastUploadInfo();
-      renderAll();
-      startPolling(); // Запускаем автоматическую проверку обновлений
-    }).catch(e=>{
-      console.error('Load error:', e);
-      // Fallback на localStorage
-      try {
-        const saved = localStorage.getItem('mx_data');
-        if(saved){ const parsed=JSON.parse(saved); if(parsed?.shops?.length>0) APP.data=parsed; }
-      } catch(e2){}
-      renderAll();
-      startPolling(); // Запускаем автоматическую проверку обновлений
-    });
-  } else { _id('login-err').textContent='Неверный логин или пароль'; }
-}
 function doLogout(){ 
   stopPolling(); // Останавливаем проверку при выходе
   _id('login-screen').style.display='flex'; 
