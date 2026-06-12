@@ -544,40 +544,89 @@ main{flex:1;padding:26px 32px 60px;max-width:1700px;margin:0 auto;width:100%}
 </style>
 
 <script>
-// Ранняя инициализация login — доступна сразу при загрузке страницы
+// Ранняя инициализация login
 function doLogin(){
   var u=document.getElementById('l-user').value.trim();
   var p=document.getElementById('l-pass').value;
   if(u==='maximussales'&&p==='Maximus2025'){
+    // Сохраняем сессию
+    sessionStorage.setItem('mx_auth','1');
     document.getElementById('login-screen').style.display='none';
     document.getElementById('app').style.display='flex';
     var ph=document.getElementById('page-home');
-    if(ph){ph.innerHTML='<div style="text-align:center;padding:80px 20px;color:#4e6a8a"><div style="margin:0 auto 20px;width:32px;height:32px;border:3px solid rgba(45,140,255,0.2);border-top-color:#2d8cff;border-radius:50%;animation:spin .7s linear infinite"></div><div style="font-size:14px">Загружаем данные...</div></div>';}
-    document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
-    if(ph) ph.classList.add('active');
-    // Вызываем основную логику после загрузки
-    setTimeout(function(){
-      if(typeof DB !== 'undefined'){
-        Promise.all([DB.loadData(), DB.loadProfiles()]).then(function(res){
-          var cloudData=res[0], profiles=res[1];
-          if(cloudData&&cloudData.data) APP.data=cloudData.data;
-          else { try{var s=localStorage.getItem('mx_data');if(s){var d=JSON.parse(s);if(d&&d.shops&&d.shops.length>0)APP.data=d;}}catch(e){} }
+    if(ph){
+      ph.innerHTML='<div style="text-align:center;padding:80px 20px;color:#4e6a8a"><div style="margin:0 auto 20px;width:32px;height:32px;border:3px solid rgba(45,140,255,0.2);border-top-color:#2d8cff;border-radius:50%;animation:spin .7s linear infinite"></div><div style="font-size:14px">Загружаем данные...</div></div>';
+      document.querySelectorAll('.page').forEach(function(pg){pg.classList.remove('active');});
+      ph.classList.add('active');
+    }
+    // Ждём пока загрузятся APP и DB из основного скрипта
+    var attempts = 0;
+    function tryInit(){
+      attempts++;
+      if(typeof renderAll === 'function' && typeof DB !== 'undefined' && typeof APP !== 'undefined'){
+        // Всё готово — грузим данные
+        var localData = null;
+        try{var s=localStorage.getItem('mx_data');if(s){var d=JSON.parse(s);if(d&&d.shops&&d.shops.length>0)localData=d;}}catch(e){}
+        // Сначала показываем локальные данные если есть
+        if(localData){ APP.data=localData; renderAll(); }
+        // Параллельно грузим из Supabase
+        DB.loadData().then(function(cloudData){
+          if(cloudData&&cloudData.data&&cloudData.data.shops&&cloudData.data.shops.length>0){
+            APP.data=cloudData.data;
+            if(cloudData.uploaded_at) localStorage.setItem('mx_last_upload_ts', new Date(cloudData.uploaded_at).getTime().toString());
+          }
+          return DB.loadProfiles();
+        }).then(function(profiles){
           APP.profiles=profiles||{};
           if(typeof updateLastUploadInfo==='function') updateLastUploadInfo();
-          if(typeof renderAll==='function') renderAll();
-        }).catch(function(){
-          try{var s=localStorage.getItem('mx_data');if(s){var d=JSON.parse(s);if(d&&d.shops)APP.data=d;}}catch(e){}
-          if(typeof renderAll==='function') renderAll();
+          renderAll();
+        }).catch(function(e){
+          console.warn('Cloud load failed:', e);
+          if(!localData) renderAll();
         });
-      } else if(typeof renderAll==='function'){
-        renderAll();
+      } else if(attempts < 50){
+        setTimeout(tryInit, 100);
+      } else {
+        // Таймаут — рендерим с тем что есть
+        if(typeof renderAll==='function') renderAll();
+        else console.error('renderAll not found after 5s');
       }
-    }, 100);
+    }
+    setTimeout(tryInit, 200);
   } else {
     var err=document.getElementById('login-err');
     if(err) err.textContent='Неверный логин или пароль';
   }
 }
+// Автовход если сессия сохранена
+window.addEventListener('load', function(){
+  if(sessionStorage.getItem('mx_auth')==='1'){
+    var ls = document.getElementById('login-screen');
+    var app = document.getElementById('app');
+    if(ls) ls.style.display='none';
+    if(app) app.style.display='flex';
+    var attempts=0;
+    function tryRender(){
+      attempts++;
+      if(typeof renderAll==='function'){
+        var localData=null;
+        try{var s=localStorage.getItem('mx_data');if(s){var d=JSON.parse(s);if(d&&d.shops&&d.shops.length>0)localData=d;}}catch(e){}
+        if(localData&&typeof APP!=='undefined') APP.data=localData;
+        renderAll();
+        if(typeof DB!=='undefined'){
+          DB.loadData().then(function(cd){
+            if(cd&&cd.data&&cd.data.shops&&cd.data.shops.length>0){
+              APP.data=cd.data;
+              renderAll();
+            }
+            return DB.loadProfiles();
+          }).then(function(pr){ APP.profiles=pr||{}; renderAll(); }).catch(function(){});
+        }
+      } else if(attempts<50){ setTimeout(tryRender,100); }
+    }
+    setTimeout(tryRender,300);
+  }
+});
 </script>
 </head>
 <body>
