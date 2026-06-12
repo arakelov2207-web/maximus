@@ -548,7 +548,16 @@ main{flex:1;padding:26px 32px 60px;max-width:1700px;margin:0 auto;width:100%}
 <!-- LOGIN -->
 <div id="login-screen">
   <div class="login-box">
-    <div class="login-logo">МАКСИМУС</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px">
+      <svg width="32" height="28" viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="0,100 60,0 120,100" fill="#cc2929"/>
+          <polygon points="35,100 60,55 85,100" fill="white" opacity="0.9"/>
+        </svg>
+      <div style="text-align:left">
+        <div style="font-family:'Inter',sans-serif;font-size:22px;font-weight:800;color:#1a5fa8;letter-spacing:2px">МАКСИМУС</div>
+        <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">мобильная связь и техника</div>
+      </div>
+    </div>
     
     <input class="login-input" id="l-user" type="text" placeholder="Логин" autocomplete="username">
     <input class="login-input" id="l-pass" type="password" placeholder="Пароль" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
@@ -588,7 +597,16 @@ main{flex:1;padding:26px 32px 60px;max-width:1700px;margin:0 auto;width:100%}
   <header>
     <div style="display:flex;align-items:center;gap:12px">
       <button class="mob-menu-btn" onclick="openSidebar()">☰</button>
-      <div class="logo">МАКСИ<span>МУС</span></div>
+      <div class="logo" style="display:flex;align-items:center;gap:8px">
+        <svg width="32" height="28" viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="0,100 60,0 120,100" fill="#cc2929"/>
+          <polygon points="35,100 60,55 85,100" fill="white" opacity="0.9"/>
+        </svg>
+        <div style="display:flex;flex-direction:column;line-height:1.1">
+          <span style="font-family:'Inter',sans-serif;font-size:17px;font-weight:800;color:#1a5fa8;letter-spacing:2px">МАКСИМУС</span>
+          <span style="font-size:7px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">мобильная связь и техника</span>
+        </div>
+      </div>
     </div>
     <div class="header-right">
       <div class="pulse"></div>
@@ -1358,6 +1376,8 @@ function openPersonDetail(pageId, name){
 
   const safeName=name.replace(/[^a-zA-Z0-9]/g,'_').slice(0,30);
   const roleLabel=pageId==='curators'?'Куратор':pageId==='topk'?'Топ Команда':'Зам РОП';
+  // Д27: Хатипов — и куратор и зам
+  const isKhatipov = name.includes('Хатипов');
   const pr=APP.profiles[name]||{};
   const reportBtn=pageId==='curators'
     ?`<div style="position:relative;display:inline-block">
@@ -1489,7 +1509,7 @@ function renderRatingPage(pageElId, arr, title){
         return `<td>
           <div style="display:flex;flex-direction:column;gap:3px">
             ${pctBadge(pc2,11)}
-            <div style="height:6px;background:rgba(255,255,255,0.07);border-radius:4px;overflow:hidden;width:70px">
+            <div style="height:8px;background:rgba(255,255,255,0.07);border-radius:5px;overflow:hidden;width:75px">
               <div style="height:100%;width:${Math.min(pc2,100)}%;background:${pctColor(pc2)};border-radius:4px"></div>
             </div>
             <div style="font-size:9px;color:var(--muted)">место ${p.places[i]||'—'}</div>
@@ -1837,13 +1857,36 @@ function renderShopsPage(pageId){
       return `<button class="filter-btn" data-c="${c}" onclick="__shopCurator_${pageId}('${c.replace(/'/g,"\\'")}',this)">${sh} (${cnt})</button>`;
     })].join('');
 
+  const brandForReport = brand;
   el.innerHTML=`
-    <div class="sec-hdr"><div class="sec-title">Магазины ${brand}</div><div class="sec-badge">${allShops.length} точек</div><div class="sec-line"></div></div>
+    <div class="sec-hdr"><div class="sec-title">Магазины \${brand}</div><div class="sec-badge">\${allShops.length} точек</div><div class="sec-line"></div></div>
     <div class="filter-row">
-      ${cBtns}
-      <input class="search-input" placeholder="Поиск по коду / названию..." oninput="__shopSearch_${pageId}(this.value)">
+      \${cBtns}
+      <button class="report-btn" onclick="showReportMenu('shops_\${pageId}')">📄 Отчёты ▾</button>
+      <input class="search-input" placeholder="Поиск по коду / названию..." oninput="__shopSearch_\${pageId}(this.value)">
     </div>
-    <div id="shop-tbl-${pageId}">${shopTableHtml(currentShops, sortKey, sortDir, pageId)}</div>`;
+    <div id="report-menu-shops_\${pageId}" class="report-menu" style="display:none">
+      <div style="font-size:10px;color:#5a7399;text-transform:uppercase;letter-spacing:1px;padding:2px 6px 6px;font-weight:700;width:100%">ТОП 20</div>
+      <div class="report-menu-item" onclick="genShopsReportFiltered('\${pageId}','settings','top')">⚙️ Настройки топ20</div>
+      <div class="report-menu-item" onclick="genShopsReportFiltered('\${pageId}','credit','top')">💳 Кредит топ20</div>
+      <div class="report-menu-item" onclick="genShopsReportFiltered('\${pageId}','vmp','top')">📐 ВМП топ20</div>
+      <div class="report-menu-item" onclick="genShopsReportFiltered('\${pageId}','sto','top')">📱 СТО топ20</div>
+      <div class="report-menu-item" onclick="genShopsReportFiltered('\${pageId}','insurance','top')">🛡 Страховки топ20</div>
+      <div class="report-menu-item" onclick="genShopsReportFiltered('\${pageId}','revenue','top')">💰 Выручка топ20</div>
+      <div class="report-menu-item" onclick="genShopsReportFiltered('\${pageId}','aks','top')">🛍 Аксессуары топ20</div>
+      <div class="report-menu-item" onclick="genShopsReportFiltered('\${pageId}','rating','top')">🏆 Рейтинг топ20</div>
+      <div style="height:1px;background:rgba(100,160,255,0.1);margin:6px 0;width:100%"></div>
+      <div style="font-size:10px;color:#5a7399;text-transform:uppercase;letter-spacing:1px;padding:2px 6px 6px;font-weight:700;width:100%">АНТИТОП 20</div>
+      <div class="report-menu-item" onclick="genShopsReportFiltered('\${pageId}','settings','bot')" style="color:var(--red)">⚙️ Настройки антитоп20</div>
+      <div class="report-menu-item" onclick="genShopsReportFiltered('\${pageId}','credit','bot')" style="color:var(--red)">💳 Кредит антитоп20</div>
+      <div class="report-menu-item" onclick="genShopsReportFiltered('\${pageId}','vmp','bot')" style="color:var(--red)">📐 ВМП антитоп20</div>
+      <div class="report-menu-item" onclick="genShopsReportFiltered('\${pageId}','sto','bot')" style="color:var(--red)">📱 СТО антитоп20</div>
+      <div class="report-menu-item" onclick="genShopsReportFiltered('\${pageId}','insurance','bot')" style="color:var(--red)">🛡 Страховки антитоп20</div>
+      <div class="report-menu-item" onclick="genShopsReportFiltered('\${pageId}','revenue','bot')" style="color:var(--red)">💰 Выручка антитоп20</div>
+      <div class="report-menu-item" onclick="genShopsReportFiltered('\${pageId}','aks','bot')" style="color:var(--red)">🛍 Аксессуары антитоп20</div>
+      <div class="report-menu-item" onclick="genShopsReportFiltered('\${pageId}','rating','bot')" style="color:var(--red)">🏆 Рейтинг антитоп20</div>
+    </div>
+    <div id="shop-tbl-\${pageId}">\${shopTableHtml(currentShops, sortKey, sortDir, pageId)}</div>\`;
 
   window[`__shopCurator_${pageId}`]=function(curator, btn){
     document.querySelectorAll(`#page-${pageId} .filter-btn`).forEach(b=>b.classList.remove('active'));
@@ -2135,61 +2178,100 @@ const RPT = {
     if(fill){ ctx.fillStyle=fill; ctx.fill(); }
   },
 
-  // Шапка отчёта
+  // Д13/Д30: Новая шапка с логотипом
   drawHeader(ctx, W, title, subtitle){
-    // Фон шапки
-    const grad=ctx.createLinearGradient(0,0,W,80);
-    grad.addColorStop(0,'#0d1e3f'); grad.addColorStop(1,'#091428');
-    ctx.fillStyle=grad; ctx.fillRect(0,0,W,80);
-    ctx.fillStyle=RPT.BORDER; ctx.fillRect(0,80,W,1);
-    // Лого
-    ctx.font='bold 22px Arial'; ctx.fillStyle=RPT.CYAN;
-    ctx.fillText('МАКСИМУС',24,50);
-    // Заголовок
-    ctx.font='bold 20px Arial'; ctx.fillStyle=RPT.WHITE;
-    ctx.fillText(title, 200, 45);
-    // Дата
+    // Градиентный фон шапки
+    const grad=ctx.createLinearGradient(0,0,W,90);
+    grad.addColorStop(0,'#0a1a35'); grad.addColorStop(1,'#060e20');
+    ctx.fillStyle=grad; ctx.fillRect(0,0,W,90);
+    // Нижняя линия шапки с градиентом
+    const lineGrad=ctx.createLinearGradient(0,0,W,0);
+    lineGrad.addColorStop(0,'#2d8cff'); lineGrad.addColorStop(0.5,'#00d4ff'); lineGrad.addColorStop(1,'transparent');
+    ctx.fillStyle=lineGrad; ctx.fillRect(0,89,W,2);
+
+    // SVG треугольник логотипа (рисуем через canvas)
+    ctx.save();
+    ctx.translate(22, 15);
+    ctx.beginPath(); ctx.moveTo(0,60); ctx.lineTo(30,0); ctx.lineTo(60,60); ctx.closePath();
+    ctx.fillStyle='#cc2929'; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(18,60); ctx.lineTo(30,33); ctx.lineTo(42,60); ctx.closePath();
+    ctx.fillStyle='rgba(255,255,255,0.9)'; ctx.fill();
+    ctx.restore();
+
+    // Название компании
+    ctx.font='bold 18px Arial'; ctx.fillStyle='#1a6fc4';
+    ctx.fillText('МАКСИМУС', 90, 38);
+    ctx.font='9px Arial'; ctx.fillStyle=RPT.MUTED;
+    ctx.fillText('мобильная связь и техника', 90, 54);
+
+    // Разделитель
+    ctx.fillStyle='rgba(100,160,255,0.15)'; ctx.fillRect(88,62,1,20);
+
+    // Заголовок отчёта
+    ctx.font='bold 21px Arial'; ctx.fillStyle=RPT.WHITE;
+    ctx.fillText(title, 102, 46);
+
+    // Дата справа
     const now=new Date();
     const ds=now.toLocaleDateString('ru-RU',{day:'2-digit',month:'long',year:'numeric'});
     ctx.font='12px Arial'; ctx.fillStyle=RPT.MUTED;
-    ctx.textAlign='right'; ctx.fillText(ds, W-24, 30);
-    ctx.fillText(subtitle||'', W-24, 52);
+    ctx.textAlign='right'; ctx.fillText(ds, W-24, 32);
+    if(subtitle) ctx.fillText(subtitle, W-24, 50);
     ctx.textAlign='left';
-    return 96; // следующий Y
+    return 100;
   },
 
-  // Строка таблицы
+  // Д14/Д30: Redesigned drawTableRow
   drawTableRow(ctx, W, y, cols, isHeader, rowPct){
-    const ROW_H=42;
-    // Фон строки
+    const ROW_H=46;
     if(isHeader){
-      ctx.fillStyle='#0a1830'; ctx.fillRect(0,y,W,ROW_H);
+      // Заголовок — тёмный фон
+      const hGrad=ctx.createLinearGradient(0,y,0,y+ROW_H);
+      hGrad.addColorStop(0,'#0c1a30'); hGrad.addColorStop(1,'#08122a');
+      ctx.fillStyle=hGrad; ctx.fillRect(0,y,W,ROW_H);
+      ctx.fillStyle='rgba(45,140,255,0.3)'; ctx.fillRect(0,y+ROW_H-1,W,1);
     } else {
-      ctx.fillStyle=rowPct!==undefined?(rowPct>=100?'rgba(56,255,176,0.04)':rowPct>=80?'rgba(255,200,71,0.04)':'rgba(255,77,109,0.04)'):'#0f1e38';
+      // Строки данных — чередующийся фон
+      const rowIdx = Math.floor((y-100)/ROW_H);
+      const baseFill = rowIdx%2===0?'#0c1830':'#0a1428';
+      if(rowPct!==undefined){
+        ctx.fillStyle=rowPct>=100?'rgba(56,255,176,0.05)':rowPct>=80?'rgba(255,200,71,0.04)':'rgba(255,77,109,0.04)';
+      } else {
+        ctx.fillStyle=baseFill;
+      }
       ctx.fillRect(0,y,W,ROW_H);
+      ctx.fillStyle='rgba(100,160,255,0.06)'; ctx.fillRect(0,y+ROW_H-1,W,1);
     }
-    // Разделитель
-    ctx.fillStyle=RPT.BORDER; ctx.fillRect(0,y+ROW_H-1,W,1);
 
     let x=0;
     cols.forEach(col=>{
-      const cx=x+col.w*0.5;
       if(isHeader){
-        ctx.font='bold 11px Arial'; ctx.fillStyle=RPT.MUTED;
+        ctx.font='bold 11px Arial';
+        ctx.fillStyle='rgba(255,255,255,0.85)';
         ctx.textAlign='center';
+        // Фон для заголовка колонки
         ctx.fillText((col.label||'').toUpperCase(), x+col.w/2, y+ROW_H/2+4);
       } else {
-        // Значение
-        ctx.font=col.bold?'bold 14px Arial':'13px Arial';
+        const fontSize = col.bold?16:14;
+        ctx.font=`${col.bold?'bold ':''}\${fontSize}px Arial`;
         ctx.fillStyle=col.color||RPT.TEXT;
         ctx.textAlign=col.align||'center';
-        const tx=col.align==='left'?x+12:col.align==='right'?x+col.w-12:x+col.w/2;
-        ctx.fillText(col.value||'', tx, y+ROW_H/2+5);
-        // Подпись под значением
-        if(col.sub){
-          ctx.font='10px Arial'; ctx.fillStyle=RPT.MUTED;
-          ctx.fillText(col.sub, tx, y+ROW_H-6);
+        const tx=col.align==='left'?x+10:col.align==='right'?x+col.w-10:x+col.w/2;
+
+        // Д23: % значения — рисуем с фоновым бейджем
+        const val=col.value||'';
+        if(val.endsWith('%')&&!isHeader&&col.color&&col.color!==RPT.TEXT&&col.color!==RPT.WHITE&&col.color!==RPT.MUTED){
+          const pctNum=parseInt(val);
+          const bgColor=col.color==='#38ffb0'||col.color===RPT.GREEN?'rgba(56,255,176,0.12)':
+                        col.color==='#ffc847'||col.color===RPT.YELLOW?'rgba(255,200,71,0.12)':
+                        'rgba(255,77,109,0.12)';
+          const bw=Math.max(ctx.measureText(val).width+16,44);
+          const bx=(col.align==='left'?tx-6:col.align==='right'?tx-bw+6:tx-bw/2);
+          RPT.roundRect(ctx,bx,y+ROW_H/2-10,bw,20,5,bgColor);
+          ctx.fillStyle=col.color; ctx.font=`bold \${fontSize}px Arial`;
         }
+        ctx.fillText(val, tx, y+ROW_H/2+5);
+        if(col.sub){ctx.font='10px Arial';ctx.fillStyle=RPT.MUTED;ctx.fillText(col.sub,tx,y+ROW_H-6);}
       }
       x+=col.w;
     });
@@ -2371,7 +2453,7 @@ function genCuratorMetricReport(metricKey){
   const COLS=[
     {label:'#',        w:44},
     {label:'Куратор',  w:230},
-    {label:'Магазинов',w:90},
+    
     {label:'% прогноза',w:110},
     {label:'Прогноз',  w:110},
     {label:'План',     w:110},
