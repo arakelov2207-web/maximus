@@ -2147,12 +2147,9 @@ const RPT = {
   // Утилиты
   pctColor(p){ return p>=100?RPT.GREEN:p>=80?RPT.YELLOW:RPT.RED; },
   fmt(n){
-    if(!n||isNaN(n)) return '0';
-    if(n>=1e9) return (n/1e9).toFixed(1)+'B';
-    if(n>=1e6) return (n/1e6).toFixed(1)+'M';
-    if(n>=1e3) return (n/1e3).toFixed(0)+'K';
-    return Math.round(n).toLocaleString('ru');
-  },
+if(!n||isNaN(n)) return '0';
+return Math.round(n).toLocaleString('ru-RU');
+},
 
   // Рисуем скруглённый прямоугольник
   roundRect(ctx, x, y, w, h, r, fill){
@@ -2263,7 +2260,7 @@ drawTableRow(ctx, W, y, cols, isHeader, rowPct){
         // Фон для заголовка колонки
         ctx.fillText((col.label||'').toUpperCase(), x+col.w/2, y+ROW_H/2+4);
       } else {
-        const fontSize = col.bold?16:14;
+        const fontSize = col.bold?18:15;
         ctx.font=`${col.bold?'bold ':''}\${fontSize}px Arial`;
         ctx.fillStyle=col.color||RPT.TEXT;
         ctx.textAlign=col.align||'center';
@@ -3230,11 +3227,11 @@ function genShopsReportFiltered(pageId, metricKey, type){
         const cols = [
             {value: String(i+1), bold: true, color: rColor},
             {value: s.kod, align: 'left', bold: true, color: '#eaf2ff'},
-            {value: s.name.length > 35 ? s.name.slice(0,35)+'...' : s.name, align: 'left', color: '#c8ddf5'},
-            {value: s.curator.split(' ').slice(0,2).join(' '), color: '#5a7399'},
+            {value: s.name.length > 40 ? s.name.slice(0,40)+'...' : s.name, align: 'left', color: RPT.WHITE, bold: true},
+            {value: s.curator.split(' ').slice(0,2).join(' '), bold: true, color: RPT.WHITE},
             {value: s.metricPct + '%', bold: true, color: pctColor},
             {value: RPT.fmt(m.forecast), bold: true, color: '#eaf2ff'},
-            {value: RPT.fmt(m.plan), color: '#5a7399'},
+            {value: RPT.fmt(m.plan), bold: true, color: RPT.WHITE},
             {value: RPT.fmt(m.fact), color: pctColor},
             {value: '', w: 100}
         ].map((col, ci) => ({...col, w: COLS[ci].w}));
