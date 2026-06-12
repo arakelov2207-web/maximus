@@ -3198,7 +3198,7 @@ function genShopsReportFiltered(pageId, metricKey, type){
     const top20 = shops.slice(0, 20);
     
     // Генерируем Canvas — УВЕЛИЧЕННАЯ ШИРИНА 1200px
-    const W = 1200;
+    const W = 1400;
     const ROW_H = 48;
     const H = 120 + 40 + ROW_H * (top20.length + 1) + 60;
     const canvas = document.createElement('canvas');
@@ -3224,12 +3224,12 @@ function genShopsReportFiltered(pageId, metricKey, type){
     const COLS = [
         {label: '#', w: 50},
         {label: 'Код', w: 90},
-        {label: 'Магазин', w: 280},
+        {label: 'Магазин', w: 340},
         {label: 'Куратор', w: 200},
         {label: '% прогноза', w: 120},
         {label: 'Прогноз', w: 120},
         {label: 'План', w: 120},
-        {label: 'Факт', w: 120},
+        {label: 'Факт', w: 140},
         {label: '', w: 100}
     ];
     
@@ -3247,7 +3247,7 @@ function genShopsReportFiltered(pageId, metricKey, type){
         const cols = [
             {value: String(i+1), bold: true, color: rColor},
             {value: s.kod, align: 'left', bold: true, color: '#eaf2ff'},
-            {value: s.name.length > 40 ? s.name.slice(0,40)+'...' : s.name, align: 'left', color: RPT.WHITE, bold: true},
+            {value: s.name.length > 50 ? s.name.slice(0,50)+'...' : s.name, align: 'left', color: RPT.WHITE, bold: true},
             {value: s.curator.split(' ').slice(0,2).join(' '), bold: true, color: RPT.WHITE},
             {value: s.metricPct + '%', bold: true, color: pctColor},
             {value: RPT.fmt(m.forecast), bold: true, color: '#eaf2ff'},
@@ -3257,7 +3257,7 @@ function genShopsReportFiltered(pageId, metricKey, type){
         ].map((col, ci) => ({...col, w: COLS[ci].w}));
         
         y = RPT.drawTableRow(ctx, W, y, cols, false, s.metricPct);
-        RPT.drawBar(ctx, 50 + 90 + 280 + 200, y - 10, 120 + 120 + 120 + 120, s.metricPct, 10);
+        RPT.drawBar(ctx, 50 + 90 + 340 + 200, y - 10, 120 + 120 + 140 + 140, s.metricPct, 10);
     });
     
     // Футер
