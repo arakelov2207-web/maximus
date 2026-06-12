@@ -1453,7 +1453,7 @@ function renderRatingPage(pageElId, arr, title){
       `<th class="rth-sortable ${thCls('m'+i)}" onclick="__rSort_${pageId}('m${i}')">${m}</th>`
     ).join('');
     const brandCol = pageId==='curators' ? '<th>БРЕНД</th>' : '';
-    const extraCols = isRatingPage ? '<th>ВЫРУЧКА</th><th>СТО</th><th>НАСТРОЙКИ</th><th>СТРАХОВКИ</th>' : '';
+    const extraCols = isRatingPage ? '<th>СТО</th><th>НАСТРОЙКИ</th><th>СТРАХОВКИ</th>' : '';
     return `<thead><tr>
       <th class="rth-sortable ${thCls('rank')}" onclick="__rSort_${pageId}('rank')">#</th>
       <th class="rth-sortable ${thCls('name')}" onclick="__rSort_${pageId}('name')">СОТРУДНИК</th>
@@ -1493,7 +1493,30 @@ function renderRatingPage(pageElId, arr, title){
           const fc=myShops.reduce((s,sh)=>s+(sh[key]?.forecast||0),0);
           return plan>0?Math.round(fc/plan*100):0;
         };
-        extraCells=`<td>${pctBadge(aggPct('revenue'),11)}</td><td>${pctBadge(aggPct('sto'),11)}</td><td>${pctBadge(aggPct('settings'),11)}</td><td>${pctBadge(aggPct('insurance'),11)}</td>`;
+        extraCells=`<td>
+<div style="display:flex;flex-direction:column;gap:2px;align-items:center">
+${pctBadge(aggPct('sto'),11)}
+<div style="height:6px;background:rgba(255,255,255,0.07);border-radius:4px;overflow:hidden;width:60px">
+<div style="height:100%;width:${Math.min(aggPct('sto'),100)}%;background:${pctColor(aggPct('sto'))};border-radius:3px"></div>
+</div>
+</div>
+</td>
+<td>
+<div style="display:flex;flex-direction:column;gap:2px;align-items:center">
+${pctBadge(aggPct('settings'),11)}
+<div style="height:6px;background:rgba(255,255,255,0.07);border-radius:4px;overflow:hidden;width:60px">
+<div style="height:100%;width:${Math.min(aggPct('settings'),100)}%;background:${pctColor(aggPct('settings'))};border-radius:3px"></div>
+</div>
+</div>
+</td>
+<td>
+<div style="display:flex;flex-direction:column;gap:2px;align-items:center">
+${pctBadge(aggPct('insurance'),11)}
+<div style="height:6px;background:rgba(255,255,255,0.07);border-radius:4px;overflow:hidden;width:60px">
+<div style="height:100%;width:${Math.min(aggPct('insurance'),100)}%;background:${pctColor(aggPct('insurance'))};border-radius:3px"></div>
+</div>
+</div>
+</td>`;
       }
 
       // D28: brand col for curators
@@ -1671,79 +1694,76 @@ function renderAllShopsPage(){
   };
 }
 
+
 function shopTableWithRatingHtml(shops, sortKey, sortDir, pageId){
-  if(!shops.length) return '<div class="empty-state">Нет данных</div>';
-  sortKey=sortKey||'rating'; sortDir=sortDir||-1; pageId=pageId||'allshops';
-
-  // Сортировка
-  const sorted=[...shops].sort((a,b)=>{
-    if(sortKey==='rating') return (shopRatingPct(a)-shopRatingPct(b))*sortDir;
-    if(sortKey==='kod')    return a.kod.localeCompare(b.kod)*sortDir;
-    if(sortKey==='name')   return a.name.localeCompare(b.name)*sortDir;
-    if(sortKey==='vmp')    return ((a.vmp||0)-(b.vmp||0))*sortDir;
-    const [mKey,mSub]=sortKey.split('_');
-    if(mSub==='pct'){
-      const ap=a[mKey]?.plan||0,af=a[mKey]?.forecast||0;
-      const bp=b[mKey]?.plan||0,bf=b[mKey]?.forecast||0;
-      return ((ap>0?af/ap:0)-(bp>0?bf/bp:0))*sortDir;
-    }
-    return ((a[mKey]?.[mSub]||0)-(b[mKey]?.[mSub]||0))*sortDir;
-  });
-
-  function thS(key,label){
-    const cls=key===sortKey?(sortDir===1?'asc':'desc'):'';
-    return `<th class="rth-sortable ${cls}" onclick="__shopColSort_${pageId}('${key}')">${label}</th>`;
-  }
-  function subSort(key,label){
-    const cls=key===sortKey?(sortDir===1?'asc':'desc'):'';
-    return `<span class="rth-sortable ${cls}" style="font-size:9px;cursor:pointer;white-space:nowrap" onclick="__shopColSort_${pageId}('${key}')">${label}</span>`;
-  }
-
-  // Нумерация
-  const rows=sorted.map((s,idx)=>{
-    const rPct=shopRatingPct(s);
-    const vmpP=s.vmp>0?Math.round(s.vmp*100):0;
-    const rc=idx===0?'r1':idx===1?'r2':idx===2?'r3':'rn';
-    return `<tr style="cursor:pointer" onclick="openShopDetail('${s.kod.replace(/'/g,"\\'")}')">
-      <td class="sticky-col rank-col"><span class="${rc}">${idx+1}</span></td>
-      <td class="sticky-col2"><span style="font-weight:800;color:var(--white)">${s.kod}</span></td>
-      <td><div style="font-size:11px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)">${s.name}</div></td>
-      <td><span class="${s.brand==='Т2'?'tag-t2':'tag-mmb'}">${s.brand}</span></td>
-      <td style="font-size:11px;color:var(--muted);white-space:nowrap">${s.curator.split(' ').slice(0,2).join(' ')}</td>
-      <td><span class="chip ${chipCls(rPct)}" style="font-size:15px;font-weight:900;padding:4px 12px">${rPct}%</span></td>
-      ${METRIC_DEFS.map(d=>metricCell(s[d.key])).join('')}
-      <td><span class="chip ${chipCls(vmpP)}" style="font-weight:800">${vmpP}%</span></td>
-    </tr>`;
-  }).join('');
-
-  const metricThs=METRIC_DEFS.map(d=>`
-    <th style="white-space:nowrap;min-width:115px;padding:6px 10px">
-      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--white);font-weight:700;margin-bottom:4px">${d.label}</div>
-      <div style="display:flex;gap:5px;align-items:center">
-        ${subSort(d.key+'_pct','%пр')}
-        <span style="color:var(--border2)">·</span>
-        ${subSort(d.key+'_plan','план')}
-        <span style="color:var(--border2)">·</span>
-        ${subSort(d.key+'_fact','факт')}
-      </div>
-    </th>`).join('');
-
-  return `<div class="metric-table-wrap"><table class="metric-table">
-    <thead><tr>
-      ${thS('rating','#')}
-      ${thS('kod','Код')}
-      ${thS('name','Магазин')}
-      <th>Бренд</th><th>Куратор</th>
-      <th class="rth-sortable ${sortKey==='rating'?(sortDir===1?'asc':'desc'):''}" onclick="__shopColSort_${pageId}('rating')">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--white);font-weight:700">Рейтинг</div>
-        <div style="font-size:9px;opacity:.6">СТО·Аксы·Кред·Усл</div>
-      </th>
-      ${metricThs}
-      <th class="rth-sortable ${sortKey==='vmp'?(sortDir===1?'asc':'desc'):''}" onclick="__shopColSort_${pageId}('vmp')">ВМП</th>
-    </table></thead>
-    <tbody>${rows}</tbody>
-  </table></div>`;
+if(!shops.length) return '<div class="empty-state">Нет данных</div>';
+sortKey=sortKey||'rating'; sortDir=sortDir||-1; pageId=pageId||'allshops';
+// Сортировка
+const sorted=[...shops].sort((a,b)=>{
+if(sortKey==='rating') return (shopRatingPct(a)-shopRatingPct(b))*sortDir;
+if(sortKey==='kod')    return a.kod.localeCompare(b.kod)*sortDir;
+if(sortKey==='name')   return a.name.localeCompare(b.name)*sortDir;
+if(sortKey==='vmp')    return ((a.vmp||0)-(b.vmp||0))*sortDir;
+const [mKey,mSub]=sortKey.split('_');
+if(mSub==='pct'){
+const ap=a[mKey]?.plan||0,af=a[mKey]?.forecast||0;
+const bp=b[mKey]?.plan||0,bf=b[mKey]?.forecast||0;
+return ((ap>0?af/ap:0)-(bp>0?bf/bp:0))*sortDir;
 }
+return ((a[mKey]?.[mSub]||0)-(b[mKey]?.[mSub]||0))*sortDir;
+});
+function thS(key,label){
+const cls=key===sortKey?(sortDir===1?'asc':'desc'):'';
+return `<th class="rth-sortable ${cls}" onclick="__shopColSort_${pageId}('${key}')">${label}</th>`;
+}
+function subSort(key,label){
+const cls=key===sortKey?(sortDir===1?'asc':'desc'):'';
+return `<span class="rth-sortable ${cls}" style="font-size:9px;cursor:pointer;white-space:nowrap" onclick="__shopColSort_${pageId}('${key}')">${label}</span>`;
+}
+// Нумерация
+const rows=sorted.map((s,idx)=>{
+const rPct=shopRatingPct(s);
+const vmpP=s.vmp>0?Math.round(s.vmp*100):0;
+const rc=idx===0?'r1':idx===1?'r2':idx===2?'r3':'rn';
+return `<tr style="cursor:pointer" onclick="openShopDetail('${s.kod.replace(/'/g,"\'")}')">
+<td class="sticky-col rank-col"><span class="${rc}">${idx+1}</span></td>
+<td class="sticky-col2"><span style="font-weight:800;color:var(--white)">${s.kod}</span></td>
+<td><div style="font-size:11px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)">${s.name}</div></td>
+<td><span class="${s.brand==='Т2'?'tag-t2':'tag-mmb'}">${s.brand}</span></td>
+<td style="font-size:11px;color:var(--muted);white-space:nowrap">${s.curator.split(' ').slice(0,2).join(' ')}</td>
+<td><span class="chip ${chipCls(rPct)}" style="font-size:15px;font-weight:900;padding:4px 12px">${rPct}%</span></td>
+${METRIC_DEFS.map(d=>metricCell(s[d.key])).join('')}
+<td><span class="chip ${chipCls(vmpP)}" style="font-weight:800">${vmpP}%</span></td>
+</tr>`;
+}).join('');
+const metricThs=METRIC_DEFS.map(d=>`
+<th style="white-space:nowrap;min-width:115px;padding:6px 10px">
+<div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--white);font-weight:700;margin-bottom:4px">${d.label}</div>
+<div style="display:flex;gap:5px;align-items:center">
+${subSort(d.key+'_pct','%пр')}
+<span style="color:var(--border2)">·</span>
+${subSort(d.key+'_plan','план')}
+<span style="color:var(--border2)">·</span>
+${subSort(d.key+'_fact','факт')}
+</div>
+</th>`).join('');
+return `<div class="metric-table-wrap"><table class="metric-table">
+<thead><tr>
+${thS('rating','#')}
+${thS('kod','Код')}
+${thS('name','Магазин')}
+<th>Бренд</th><th>Куратор</th>
+<th class="rth-sortable ${sortKey==='rating'?(sortDir===1?'asc':'desc'):''}" onclick="__shopColSort_${pageId}('rating')">
+<div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--white);font-weight:700">Рейтинг</div>
+<div style="font-size:9px;opacity:.6">СТО·Аксы·Кред·Усл</div>
+</th>
+${metricThs}
+<th class="rth-sortable ${sortKey==='vmp'?(sortDir===1?'asc':'desc'):''}" onclick="__shopColSort_${pageId}('vmp')">ВМП</th>
+</tr></thead>
+<tbody>${rows}</tbody>
+</table></div>`;
+}
+
 function shopTableHtml(shops, sortKey, sortDir, pageId){
   if(!shops.length) return '<div class="empty-state">Нет данных</div>';
 
