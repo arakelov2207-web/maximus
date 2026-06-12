@@ -2834,6 +2834,208 @@ if(sessionStorage.getItem('mx_auth')==='1'){
     startPolling();
   });
 }
+// ═══════════════════════════════════════════════
+// ОТЧЁТЫ ПО ГРУППАМ (кураторы/топк/зам)
+// ═══════════════════════════════════════════════
+function genGroupReport(groupType, metricKey){
+    console.log('genGroupReport called:', groupType, metricKey);
+    
+    const METRIC_MAP = {
+        'settings':  {label:'Настройки',     shopKey:'settings',  color:'#38ffb0'},
+        'credit':    {label:'Кредит',        shopKey:'credit',    color:'#2d8cff'},
+        'vmp':       {label:'ВМП',           shopKey:'vmp',       color:'#ffc847'},
+        'aks_priority':{label:'Акс Приоритет',shopKey:'aks',      color:'#ff6b6b'},
+        'sto':       {label:'СТО',           shopKey:'sto',       color:'#00d4ff'},
+        'insurance': {label:'Страховки',     shopKey:'insurance', color:'#a78bfa'},
+        'shares':    {label:'По долям',      shopKey:'revenue',   color:'#2dd4bf'},
+        'revenue':   {label:'Выручка',       shopKey:'revenue',   color:'#2d8cff'},
+        'aks':       {label:'Аксессуары',    shopKey:'aks',       color:'#38ffb0'},
+        'services':  {label:'Услуги',        shopKey:'services',  color:'#f59e0b'},
+        'rating':    {label:'Рейтинг',       shopKey:'rating',    color:'#8b5cf6'}
+    };
+    
+    const metric = METRIC_MAP[metricKey];
+    if(!metric){ alert('Неизвестный тип отчёта: '+metricKey); return; }
+    
+    // Определяем группу
+    let staffList, pageId, title;
+    if(groupType==='curators'){
+        staffList = APP.data.ratings.curators;
+        pageId = 'curators';
+        title = 'Рейтинг кураторов';
+    } else if(groupType==='topk'){
+        staffList = APP.data.ratings.topk;
+        pageId = 'topk';
+        title = 'Топ Команда';
+    } else if(groupType==='zam'){
+        staffList = APP.data.ratings.zam;
+        pageId = 'zam';
+        title = 'Замы РОП';
+    } else {
+        alert('Неизвестная группа: '+groupType);
+        return;
+    }
+    
+    if(!staffList || staffList.length===0){
+        alert('Нет данных для отчёта');
+        return;
+    }
+    
+    // Специальная обработка для рейтинга
+    if(metricKey==='rating'){
+        if(groupType==='curators') genCuratorRatingReport();
+        else genTopkRatingReport(staffList, title);
+        return;
+    }
+    
+    // Собираем данные
+    const keyMap = {curators:'curator', topk:'topk', zam:'zam'};
+    const staffKey = keyMap[groupType];
+    
+    const rows = staffList.map(person => {
+        const myShops = APP.data.shops.filter(s => s[staffKey] === person.name);
+        const plan = myShops.reduce((s,sh) => s + (sh[metric.shopKey]?.plan || 0), 0);
+        const fact = myShops.reduce((s,sh) => s + (sh[metric.shopKey]?.fact || 0), 0);
+        const fc = myShops.reduce((s,sh) => s + (sh[metric.shopKey]?.forecast || 0), 0);
+        const pct = plan > 0 ? Math.round(fc / plan * 100) : 0;
+        return {
+            name: person.name,
+            rank: person.rank,
+            plan: plan,
+            fact: fact,
+            forecast: fc,
+            pct: pct,
+            shops: myShops.length
+        };
+    }).sort((a,b) => b.pct - a.pct); // сортировка по % вниз
+    
+    // Генерируем Canvas
+    const W = 900;
+    const ROW_H = 48;
+    const H = 100 + 40 + ROW_H * (rows.length + 1) + 50;
+    const canvas = document.createElement('canvas');
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    
+    // Фон
+    ctx.fillStyle = '#060c1a';
+    ctx.fillRect(0, 0, W, H);
+    
+    // Шапка
+    let y = RPT.drawHeader(ctx, W, metric.label + ' — ' + title, 'сортировка по % прогноза ↓');
+    
+    // Подзаголовок
+    ctx.font = '12px Arial';
+    ctx.fillStyle = '#5a7399';
+    ctx.fillText('Прогноз / План / Факт по каждому сотруднику', 24, y + 20);
+    y += 36;
+    
+    // Колонки
+    const COLS = [
+        {label: '#', w: 50},
+        {label: 'Сотрудник', w: 280},
+        {label: 'Магазинов', w: 90},
+        {label: '% прогноза', w: 110},
+        {label: 'Прогноз', w: 120},
+        {label: 'План', w: 110},
+        {label: 'Факт', w: 110},
+        {label: '', w: 30}
+    ];
+    
+    RPT.drawTableRow(ctx, W, y, COLS, true);
+    y += ROW_H;
+    
+    // Строки
+    rows.forEach((r, i) => {
+        const rankColors = ['#ffc847', '#c0c0c0', '#cd7f32'];
+        const rColor = i < 3 ? rankColors[i] : '#c8ddf5';
+        const pctColor = r.pct >= 100 ? '#38ffb0' : r.pct >= 80 ? '#ffc847' : '#ff4d6d';
+        
+        const cols = [
+            {value: String(r.rank), bold: true, color: rColor},
+            {value: r.name, align: 'left', color: '#eaf2ff', bold: i < 3},
+            {value: String(r.shops), color: '#5a7399'},
+            {value: r.pct + '%', bold: true, color: pctColor},
+            {value: RPT.fmt(r.forecast), bold: true, color: '#eaf2ff'},
+            {value: RPT.fmt(r.plan), color: '#5a7399'},
+            {value: RPT.fmt(r.fact), color: pctColor},
+            {value: '', w: 30}
+        ].map((col, ci) => ({...col, w: COLS[ci].w}));
+        
+        y = RPT.drawTableRow(ctx, W, y, cols, false, r.pct);
+        
+        // Прогресс-бар
+        RPT.drawBar(ctx, 50 + 280 + 90, y - 10, 110 + 120 + 110 + 110, r.pct, 10);
+    });
+    
+    // Футер
+    y += 14;
+    ctx.font = '11px Arial';
+    ctx.fillStyle = '#5a7399';
+    ctx.fillText('Сформировано: ' + new Date().toLocaleString('ru-RU') + ' · МАКСИМУС Sales Intelligence', 24, y + 16);
+    
+    // Скачивание
+    const dateStr = new Date().toLocaleDateString('ru-RU').replace(/\./g, '-');
+    RPT.download(canvas, metric.label.replace(/ /g, '_') + '_' + groupType + '_' + dateStr);
+}
+
+// Отчёт: Рейтинг Топ Команды / Замов
+function genTopkRatingReport(staffList, title){
+    const W = 900;
+    const ROW_H = 48;
+    const H = 100 + 40 + ROW_H * (staffList.length + 1) + 50;
+    const canvas = document.createElement('canvas');
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    
+    ctx.fillStyle = '#060c1a';
+    ctx.fillRect(0, 0, W, H);
+    
+    let y = RPT.drawHeader(ctx, W, title, 'итоговый рейтинг');
+    
+    ctx.font = '12px Arial';
+    ctx.fillStyle = '#5a7399';
+    ctx.fillText('Сортировка по итоговому рейтингу (меньше = лучше)', 24, y + 20);
+    y += 36;
+    
+    const COLS = [
+        {label: '#', w: 50},
+        {label: 'Сотрудник', w: 350},
+        {label: 'ИТОГ', w: 100},
+        {label: 'Место', w: 100},
+        {label: '', w: 300}
+    ];
+    
+    RPT.drawTableRow(ctx, W, y, COLS, true);
+    y += ROW_H;
+    
+    const sorted = [...staffList].sort((a,b) => a.rank - b.rank);
+    
+    sorted.forEach((p, i) => {
+        const rankColors = ['#ffc847', '#c0c0c0', '#cd7f32'];
+        const rColor = i < 3 ? rankColors[i] : '#c8ddf5';
+        
+        const cols = [
+            {value: String(p.rank), bold: true, color: rColor},
+            {value: p.name, align: 'left', color: '#eaf2ff', bold: i < 3},
+            {value: String(p.itog), bold: true, color: '#00d4ff'},
+            {value: '#' + p.rank, color: rColor},
+            {value: '', w: 300}
+        ].map((col, ci) => ({...col, w: COLS[ci].w}));
+        
+        y = RPT.drawTableRow(ctx, W, y, cols, false);
+    });
+    
+    y += 14;
+    ctx.font = '11px Arial';
+    ctx.fillStyle = '#5a7399';
+    ctx.fillText('Сформировано: ' + new Date().toLocaleString('ru-RU') + ' · МАКСИМУС', 24, y + 16);
+    
+    const dateStr = new Date().toLocaleDateString('ru-RU').replace(/\./g, '-');
+    RPT.download(canvas, 'рейтинг_' + title.toLowerCase().replace(/ /g, '_') + '_' + dateStr);
+}
 </script>
 </body>
 </html>
