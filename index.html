@@ -2526,58 +2526,56 @@ renderProfiles();
 // ═══════════════════════════════════════════════
 // ИНИЦИАЛИЗАЦИЯ ВХОДА
 // ═══════════════════════════════════════════════
+function _loadAppData(){
+Promise.all([DB.loadData(), DB.loadProfiles()]).then(([cd,pr])=>{
+if(cd&&cd.data&&cd.data.shops&&cd.data.shops.length>0){
+APP.data=cd.data;
+if(cd.uploaded_at) localStorage.setItem('mx_last_upload_ts',new Date(cd.uploaded_at).getTime().toString());
+} else {
+try{const s=localStorage.getItem('mx_data');if(s){const d=JSON.parse(s);if(d?.shops?.length>0)APP.data=d;}}catch(e){}
+}
+APP.profiles=pr||{};
+updateLastUploadInfo();
+renderAll();
+startPolling();
+}).catch(()=>{
+try{const s=localStorage.getItem('mx_data');if(s){const d=JSON.parse(s);if(d?.shops?.length>0)APP.data=d;}}catch(e){}
+renderAll();
+startPolling();
+});
+}
+
 function doLogin(){
-const u=_id('l-user').value.trim(), p=_id('l-pass').value;
+const u=_id('l-user')?.value?.trim()||'', p=_id('l-pass')?.value||'';
 if(u==='maximussales'&&p==='Maximus2025'){
 sessionStorage.setItem('mx_auth','1');
-_id('login-screen').style.display='none';
-_id('app').style.display='flex';
-_id('page-home').innerHTML='<div style="text-align:center;padding:80px 20px;color:var(--muted)"><div class="spinner" style="width:32px;height:32px;border-width:3px;margin:0 auto 20px"></div><div style="font-size:14px">Загружаем данные...</div></div>';
+const ls=_id('login-screen'), ap=_id('app'), ph=_id('page-home');
+if(ls) ls.style.display='none';
+if(ap) ap.style.display='flex';
+if(ph){
+ph.innerHTML='<div style="text-align:center;padding:80px 20px;color:var(--muted)"><div class="spinner" style="width:32px;height:32px;border-width:3px;margin:0 auto 20px"></div><div style="font-size:14px">Загружаем данные...</div></div>';
 document.querySelectorAll('.page').forEach(pg=>pg.classList.remove('active'));
-_id('page-home').classList.add('active');
-Promise.all([DB.loadData(), DB.loadProfiles()]).then(([cd,pr])=>{
-if(cd&&cd.data&&cd.data.shops&&cd.data.shops.length>0){
-APP.data=cd.data;
-if(cd.uploaded_at) localStorage.setItem('mx_last_upload_ts',new Date(cd.uploaded_at).getTime().toString());
+ph.classList.add('active');
+}
+_loadAppData();
 } else {
-try{const s=localStorage.getItem('mx_data');if(s){const d=JSON.parse(s);if(d?.shops?.length>0)APP.data=d;}}catch(e){}
-}
-APP.profiles=pr||{};
-updateLastUploadInfo();
-renderAll();
-startPolling();
-}).catch(()=>{
-try{const s=localStorage.getItem('mx_data');if(s){const d=JSON.parse(s);if(d?.shops?.length>0)APP.data=d;}}catch(e){}
-renderAll();
-startPolling();
-});
-} else {
-_id('login-err').textContent='Неверный логин или пароль';
+const le=_id('login-err');
+if(le) le.textContent='Неверный логин или пароль';
 }
 }
-document.getElementById('l-pass') && document.getElementById('l-pass').addEventListener('keydown',function(e){
+
+// Enter на поле пароля
+const passField = _id('l-pass');
+if(passField) passField.addEventListener('keydown',function(e){
 if(e.key==='Enter') doLogin();
 });
+
+// Автовход если сессия активна
 if(sessionStorage.getItem('mx_auth')==='1'){
-_id('login-screen').style.display='none';
-_id('app').style.display='flex';
-doLogin._autoLogin = true;
-Promise.all([DB.loadData(), DB.loadProfiles()]).then(([cd,pr])=>{
-if(cd&&cd.data&&cd.data.shops&&cd.data.shops.length>0){
-APP.data=cd.data;
-if(cd.uploaded_at) localStorage.setItem('mx_last_upload_ts',new Date(cd.uploaded_at).getTime().toString());
-} else {
-try{const s=localStorage.getItem('mx_data');if(s){const d=JSON.parse(s);if(d?.shops?.length>0)APP.data=d;}}catch(e){}
-}
-APP.profiles=pr||{};
-updateLastUploadInfo();
-renderAll();
-startPolling();
-}).catch(()=>{
-try{const s=localStorage.getItem('mx_data');if(s){const d=JSON.parse(s);if(d?.shops?.length>0)APP.data=d;}}catch(e){}
-renderAll();
-startPolling();
-});
+const ls=_id('login-screen'), ap=_id('app');
+if(ls) ls.style.display='none';
+if(ap) ap.style.display='flex';
+_loadAppData();
 }
 // ═══════════════════════════════════════════════
 // ОТЧЁТЫ ПО ГРУППАМ
