@@ -2120,6 +2120,13 @@ function parseWorkbook(wb){
   const ratings={topk:tI>=0?exBlock(tI,wI>=0?wI:tI+25):[],curators:cI>=0?exBlock(cI,zI>=0?zI:cI+30):[],zam:zI>=0?exBlock(zI,zI+5):[]};
   function uq(arr){const s=new Set(),o=[];arr.forEach(x=>{if(x&&!s.has(x)){s.add(x);o.push(x)}});return o;}
   const staff={curators:uq(shops.map(s=>s.curator)),topk:uq(shops.map(s=>s.topk)),zam:uq(shops.map(s=>s.zam))};
+    // ═══════════════════════════════════════════════
+    // ФИЛЬТРАЦИЯ РЕЙТИНГОВ ПО РЕАЛЬНОМУ ЗАКРЕПЛЕНИЮ
+    // ═══════════════════════════════════════════════
+    ratings.topk=ratings.topk.filter(p=>staff.topk.includes(p.name));
+    ratings.curators=ratings.curators.filter(p=>staff.curators.includes(p.name));
+    ratings.zam=ratings.zam.filter(p=>staff.zam.includes(p.name));
+    console.log('Рейтинги отфильтрованы:',ratings.topk.length+'топк,',ratings.curators.length+'кур.,',ratings.zam.length+'зам.');
   // ═══════════════════════════════════════════════
     // ФИЛЬТРАЦИЯ РЕЙТИНГОВ ПО РЕАЛЬНОМУ ЗАКРЕПЛЕНИЮ
     // Оставляем только тех сотрудников, кто реально
