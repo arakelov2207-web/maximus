@@ -2032,7 +2032,7 @@ function handleFile(file){
       const now=Date.now();
 
       if(APP.uploadType==='final'){
-        const lbl=prompt('Метка архива (например: Май 2026):\n\nФайл сохранится в историю месяцев.','');
+        const lbl=prompt('Метка архива (например: Май 2026):\nФайл сохранится в историю месяцев.','');
         if(lbl){
           setProgress(80,'Сохраняем в историю...');
           await DB.saveHistory(lbl, parsed);
