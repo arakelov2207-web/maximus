@@ -2142,7 +2142,7 @@ function parseWorkbook(wb){
     // Оставляем только тех сотрудников, кто реально
     // закреплён за магазинами в первой таблице
     // ═══════════════════════════════════════════════
-    const filterByStaff=(arr,staffArr)=>arr.filter(p=>staffArr.includes(p.name));
+    
     ratings.topk=filterByStaff(ratings.topk,staff.topk);
     ratings.curators=filterByStaff(ratings.curators,staff.curators);
     ratings.zam=filterByStaff(ratings.zam,staff.zam);
