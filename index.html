@@ -7,14 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-:root{
---bg:#04091a;--surface:#080f23;--card:#0c1830;--card2:#101e36;
---border:rgba(100,160,255,0.1);--border2:rgba(100,160,255,0.22);
---accent:#2d8cff;--accent2:#00d4ff;--accent3:#38ffb0;
---red:#ff4d6d;--gold:#ffc847;--muted:#4e6a8a;--text:#bfd4f0;--white:#e8f2ff;
---t2-bg:rgba(45,140,255,0.18);--t2-border:rgba(45,140,255,0.5);--t2-color:#60aaff;
---mmb-bg:rgba(167,139,250,0.18);--mmb-border:rgba(167,139,250,0.5);--mmb-color:#b89dff;
-}
+:root{--bg:#04091a;--surface:#080f23;--card:#0c1830;--card2:#101e36;--border:rgba(100,160,255,0.1);--border2:rgba(100,160,255,0.22);--accent:#2d8cff;--accent2:#00d4ff;--accent3:#38ffb0;--red:#ff4d6d;--gold:#ffc847;--muted:#4e6a8a;--text:#bfd4f0;--white:#e8f2ff;--t2-bg:rgba(45,140,255,0.18);--t2-border:rgba(45,140,255,0.5);--t2-color:#60aaff;--mmb-bg:rgba(167,139,250,0.18);--mmb-border:rgba(167,139,250,0.5);--mmb-color:#b89dff}
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;overflow-x:hidden}
 ::-webkit-scrollbar{width:5px;height:5px}
@@ -22,7 +15,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 ::-webkit-scrollbar-thumb{background:rgba(100,160,255,0.2);border-radius:3px}
 ::-webkit-scrollbar-thumb:hover{background:rgba(45,140,255,0.5)}
 #login-screen{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 35% 35%,#0a1e45 0%,#04091a 65%)}
-.login-box{width:400px;padding:52px 44px;background:linear-gradient(160deg,#0d1e3c 0%,#080f23 100%);border:1px solid var(--border2);border-radius:24px;box-shadow:0 0 80px rgba(45,140,255,0.12);text-align:center}
+.login-box{width:400px;padding:52px 44px;background:linear-gradient(160deg,#0d1e3c 0%,#080f23 100%);border:1px solid var(--border2);border-radius:24px;box-shadow:0 0 80px rgba(45,140,255,0.12),0 0 0 1px rgba(255,255,255,0.04);text-align:center}
 .login-input{width:100%;padding:14px 18px;margin-bottom:14px;background:rgba(255,255,255,0.05);border:1px solid var(--border2);border-radius:12px;color:var(--white);font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:all .2s}
 .login-input:focus{border-color:var(--accent);background:rgba(45,140,255,0.06);box-shadow:0 0 0 3px rgba(45,140,255,0.1)}
 .login-btn{width:100%;padding:14px;background:linear-gradient(135deg,#2d8cff,#00d4ff);border:none;border-radius:12px;color:#fff;font-family:'Inter',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .25s;letter-spacing:.3px}
@@ -272,7 +265,6 @@ main{flex:1;padding:26px 32px 60px;max-width:1700px;margin:0 auto;width:100%}
 .sidebar-logout{font-size:12px;color:var(--muted);text-align:center;cursor:pointer;padding:4px;border-radius:6px;transition:all .15s}
 .sidebar-logout:hover{color:var(--text);background:rgba(255,255,255,0.04)}
 .mob-menu-btn{display:none;background:none;border:none;cursor:pointer;padding:6px;color:var(--text);font-size:22px;line-height:1}
-/* Settings page */
 .settings-section{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px}
 .settings-section h3{font-family:'Unbounded',sans-serif;font-size:14px;color:var(--white);margin-bottom:12px;font-weight:700}
 .settings-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
@@ -284,7 +276,6 @@ main{flex:1;padding:26px 32px 60px;max-width:1700px;margin:0 auto;width:100%}
 .settings-btn:hover{background:rgba(45,140,255,0.1);border-color:var(--accent);color:var(--accent)}
 .settings-btn.danger{border-color:rgba(255,77,109,0.3);color:var(--red)}
 .settings-btn.danger:hover{background:rgba(255,77,109,0.1)}
-/* Bday page */
 .bday-list{display:flex;flex-direction:column;gap:8px}
 .bday-item{display:flex;align-items:center;gap:14px;padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:12px;transition:all .2s}
 .bday-item:hover{border-color:var(--border2);transform:translateX(4px)}
@@ -471,6 +462,7 @@ ondrop="handleDrop(event)">
 <option value="revenue">Выручка</option>
 <option value="sto">СТО</option>
 <option value="aks">Аксессуары</option>
+<option value="aks_priority">Акс Приоритет</option>
 <option value="settings">Настройки</option>
 <option value="insurance">Страховки</option>
 <option value="credit">Кредит</option>
@@ -484,20 +476,18 @@ ondrop="handleDrop(event)">
 <option value="bot">АНТИТОП (худшие)</option>
 </select></div>
 <div class="form-group"><label class="form-label">Количество строк</label><input class="form-input" id="sm-count" type="number" value="20" min="5" max="50"></div>
+<div class="form-group"><label class="form-label">Ширина (px)</label><input class="form-input" id="sm-width" type="number" value="1400" min="800" max="2400"></div>
+<div class="form-group"><label class="form-label">Высота строки (px)</label><input class="form-input" id="sm-row-h" type="number" value="48" min="30" max="80"></div>
 <button class="form-save" onclick="saveReportConfig()">Сохранить</button>
 </div>
 </div>
 <script>
-// ═══════════════════════════════════════════════
-// SUPABASE CONFIG
-// ═══════════════════════════════════════════════
-const SUPABASE_URL = 'https://cwsyikrqgsppwlskjsqz.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3c3lpa3JxZ3NwcHdsc2tqc3F6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5NDIyNDIsImV4cCI6MjA5NjUxODI0Mn0.UH6tPMjCKomwzDwVKd2o_RTHVAXoNmD6PEhk8Ufq_0I';
-const SB_HEADERS = {'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Prefer':'return=minimal'};
-const EMPTY_DATA = {"network":{},"bештау":{"total_sum":0,"total_qty":0,"by_shop":{}},"shops":[],"staff":{"curators":[],"topk":[],"zam":[]},"ratings":{"topk":[],"curators":[],"zam":[]}};
-const SEVEN_DAYS = 7*24*60*60*1000;
-
-const DB = {
+const SUPABASE_URL='https://cwsyikrqgsppwlskjsqz.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3c3lpa3JxZ3NwcHdsc2tqc3F6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5NDIyNDIsImV4cCI6MjA5NjUxODI0Mn0.UH6tPMjCKomwzDwVKd2o_RTHVAXoNmD6PEhk8Ufq_0I';
+const SB_HEADERS={'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Prefer':'return=minimal'};
+const EMPTY_DATA={network:{},bештау:{total_sum:0,total_qty:0,by_shop:{}},shops:[],staff:{curators:[],topk:[],zam:[]},ratings:{topk:[],curators:[],zam:[]}};
+const SEVEN_DAYS=7*24*60*60*1000;
+const DB={
 async loadData(){
 try{const r=await fetch(SUPABASE_URL+'/rest/v1/dashboard_data?id=eq.current&select=data,uploaded_at',{method:'GET',headers:{...SB_HEADERS,'Cache-Control':'no-cache'}});
 if(!r.ok)return null;const rows=await r.json();
@@ -517,12 +507,11 @@ async loadProfiles(){
 try{const r=await fetch(SUPABASE_URL+'/rest/v1/staff_profiles?select=name,phone,telegram,photo_url,birthday',{headers:SB_HEADERS});if(!r.ok)return{};const rows=await r.json();const result={};rows.forEach(p=>{result[p.name]={phone:p.phone||'',tg:p.telegram||'',photo:p.photo_url||'',birthday:p.birthday||''};});return result;}catch(e){return{};}
 }
 };
-
-const APP={data:EMPTY_DATA,profiles:{},history:[],uploadType:'daily',editingProfile:null,cloudLoaded:false,reportConfigs:[]};
-
+const APP={data:EMPTY_DATA,profiles:{},history:[],uploadType:'daily',editingProfile:null,cloudLoaded:false,reportConfigs:[],previousPage:'home'};
 function openSidebar(){_id('sidebar').classList.add('open');_id('mob-overlay').classList.add('show');document.body.style.overflow='hidden';}
 function closeSidebar(){_id('sidebar').classList.remove('open');_id('mob-overlay').classList.remove('show');document.body.style.overflow='';}
 function navTo(pageId){
+APP.previousPage=pageId;
 document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
 const dt=document.querySelector('.nav-tab[data-page="'+pageId+'"]');if(dt)dt.classList.add('active');
 document.querySelectorAll('.sidebar-tab').forEach(t=>t.classList.remove('active'));
@@ -532,7 +521,6 @@ _id('page-'+pageId).classList.add('active');
 closeSidebar();window.scrollTo(0,0);
 }
 function goPage(id){navTo(id);}
-
 function updateLastUploadInfo(){
 const ts=localStorage.getItem('mx_last_upload_ts');
 if(!ts){const msg='Файл не загружен';const el=_id('last-upload-info');if(el)el.textContent=msg;const sel=_id('sidebar-upload-info');if(sel)sel.textContent=msg;return;}
@@ -544,9 +532,7 @@ const el=_id('last-upload-info');if(el)el.innerHTML=html;
 const sel=_id('sidebar-upload-info');if(sel)sel.innerHTML=html;
 }
 function doLogout(){stopPolling();localStorage.removeItem('mx_auth_ts');_id('login-screen').style.display='flex';_id('app').style.display='none';_id('l-pass').value='';}
-
 document.querySelectorAll('.nav-tab').forEach(tab=>{tab.addEventListener('click',()=>navTo(tab.dataset.page));});
-
 function _id(id){return document.getElementById(id);}
 function fmt(n){if(!n||isNaN(n))return'0';return Math.round(n).toLocaleString('ru-RU');}
 function fmtN(n){return Math.round(n||0).toLocaleString('ru-RU');}
@@ -566,12 +552,13 @@ return'<div style="'+style+'">'+initials(name)+'</div>';
 }
 function getContact(n){const p=APP.profiles[n];return[p?.phone,p?.tg].filter(Boolean).join(' · ')||'';}
 
+// ИСПРАВЛЕНИЕ 1: Убран дубль прогноза в KPI карточках
 function kpiCardHtml(label,fact,plan,forecast,color){
 const fcPct=plan>0?Math.round(forecast/plan*100):0;
 const factPct=plan>0?Math.round(fact/plan*100):0;
 const progW=Math.min(fcPct,100);const progC=pctColor(fcPct);
 if(!plan)return'<div class="kpi-card '+color+'"><div class="kpi-label">'+label+'</div><div class="kpi-pct-row"><div class="kpi-forecast-main">'+fmt(fact)+'</div><div style="font-size:12px;font-weight:700;color:var(--text);opacity:.6;align-self:flex-end;padding-bottom:3px">факт</div></div></div>';
-return'<div class="kpi-card '+color+'"><div class="kpi-label">'+label+'</div><div class="kpi-pct-row">'+pctBadge(fcPct,16)+'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:1px"><span style="font-size:10px;font-weight:700;color:var(--text);opacity:.5;text-transform:uppercase;letter-spacing:.5px">прогноз</span><span style="font-size:13px;font-weight:800;color:var(--white)">'+fmt(forecast)+'</span></div></div><div class="kpi-prog-track"><div class="kpi-prog-fill" style="width:'+progW+'%;background:'+progC+'"></div></div><div class="kpi-bottom"><div class="kpi-bottom-item"><span class="kpi-bottom-lbl">ПЛАН</span><span class="kpi-bottom-val" style="color:var(--white)">'+fmt(plan)+'</span></div><div class="kpi-divider"></div><div class="kpi-bottom-item" style="text-align:center"><span class="kpi-bottom-lbl">ФАКТ</span><span class="kpi-bottom-val" style="color:'+pctColor(factPct)+'">'+fmt(fact)+'</span></div><div class="kpi-divider"></div><div class="kpi-bottom-item" style="text-align:right"><span class="kpi-bottom-lbl">ПРОГНОЗ</span><span class="kpi-bottom-val" style="color:var(--white)">'+fmt(forecast)+'</span></div></div></div>';
+return'<div class="kpi-card '+color+'"><div class="kpi-label">'+label+'</div><div class="kpi-pct-row">'+pctBadge(fcPct,16)+'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:1px"><span style="font-size:10px;font-weight:700;color:var(--text);opacity:.5;text-transform:uppercase;letter-spacing:.5px">прогноз</span><span style="font-size:13px;font-weight:800;color:var(--white)">'+fmt(forecast)+'</span></div></div><div class="kpi-prog-track"><div class="kpi-prog-fill" style="width:'+progW+'%;background:'+progC+'"></div></div><div class="kpi-bottom"><div class="kpi-bottom-item"><span class="kpi-bottom-lbl">ПЛАН</span><span class="kpi-bottom-val" style="color:var(--white)">'+fmt(plan)+'</span></div><div class="kpi-divider"></div><div class="kpi-bottom-item" style="text-align:center"><span class="kpi-bottom-lbl">ФАКТ</span><span class="kpi-bottom-val" style="color:'+pctColor(factPct)+'">'+fmt(fact)+'</span></div></div></div>';
 }
 
 let homeNetFilter='all';
@@ -594,18 +581,14 @@ if(homeNetFilter==='mmb'&&k.brandFilter==='Т2')return;
 const shopsForKey=k.brandFilter?APP.data.shops.filter(s=>s.brand===k.brandFilter):filteredShops;
 const fact=shopsForKey.reduce((s,sh)=>s+(sh[k.shopKey]?.fact||0),0);
 const forecast=shopsForKey.reduce((s,sh)=>s+(sh[k.shopKey]?.forecast||0),0);
-let plan;
-// План = сумма планов магазинов * 0.95 для режима "все"
 const shopsPlan=shopsForKey.reduce((s,sh)=>s+(sh[k.shopKey]?.plan||0),0);
-// План всегда = сумма планов магазинов × 0.95
-plan=Math.round(shopsPlan*0.95);
+const plan=Math.round(shopsPlan*0.95);
 kpis+=kpiCardHtml(k.label,Math.round(fact),Math.round(plan),Math.round(forecast),k.c);
 });
 const beshFact=homeNetFilter==='all'?B.total_sum:Object.entries(B.by_shop).reduce((s,[kod,v])=>{const sh=filteredShops.find(x=>x.kod===kod);return s+(sh?v.sum:0);},0);
 const beshQty=homeNetFilter==='all'?B.total_qty:Object.entries(B.by_shop).reduce((s,[kod,v])=>{const sh=filteredShops.find(x=>x.kod===kod);return s+(sh?v.qty:0);},0);
 kpis+='<div class="kpi-card c-red"><div class="kpi-label">Бештау · нал СТО</div><div class="kpi-pct-row"><div class="kpi-pct-big pct-ok">'+fmt(beshFact)+'</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:1px"><span style="font-size:10px;font-weight:700;color:var(--text);opacity:.5;text-transform:uppercase;letter-spacing:.5px">факт</span><span style="font-size:13px;font-weight:800;color:var(--white)">'+beshQty+' шт</span></div></div></div>';
 kpis+='</div>';
-
 function top3Group(title,arr,pageId){
 if(!arr?.length)return'<div class="top3-group"><div class="top3-group-title">'+title+'</div><div style="color:var(--muted);font-size:12px;padding:10px 0">Нет данных</div></div>';
 const top=arr.slice(0,3);let cards='';
@@ -613,7 +596,6 @@ top.forEach((p,i)=>{const rc=rankCls(i+1);cards+='<div class="top3-card" onclick
 return'<div class="top3-group"><div class="top3-group-title">'+title+'</div>'+cards+'</div>';
 }
 const top3Sec='<div class="sec-hdr"><div class="sec-title">Топ рейтинги</div><div class="sec-badge">по месяцу</div><div class="sec-line"></div></div><div class="top3-groups">'+top3Group('Кураторы',APP.data.ratings.curators,'curators')+top3Group('Топ Команда',APP.data.ratings.topk,'topk')+top3Group('Замы РОП',APP.data.ratings.zam,'zam')+'</div>';
-
 const t2=APP.data.shops.filter(s=>s.brand==='Т2');const mmb=APP.data.shops.filter(s=>s.brand==='ММБ');
 const sumMetric=(arr,k,sub)=>arr.reduce((s,sh)=>s+(sh[k]?.[sub]||0),0);
 const chartGroups=[{label:'СТО',key:'sto',colT2:'#2d8cff',colMMB:'#00d4ff'},{label:'Аксессуары',key:'aks',colT2:'#38ffb0',colMMB:'#6ee7b7'},{label:'Кредит',key:'credit',colT2:'#ffc847',colMMB:'#fde68a'},{label:'Услуги',key:'services',colT2:'#2dd4bf',colMMB:'#99f6e4'}];
@@ -623,12 +605,10 @@ function candlePair(plan,fc,col,sublabel){const planH=Math.round(plan/maxVal*BAR
 let candleGroupsHtml='';
 chartGroups.forEach((g,i)=>{if(i>0)candleGroupsHtml+='<div style="width:1px;background:var(--border);margin:0 6px;align-self:stretch;margin-top:22px"></div>';candleGroupsHtml+='<div style="flex:1;display:flex;flex-direction:column;gap:6px;min-width:0"><div style="font-size:11px;font-weight:800;color:var(--white);text-align:center;text-transform:uppercase;letter-spacing:.8px">'+g.label+'</div><div style="display:flex;gap:8px">'+candlePair(sumMetric(t2,g.key,'plan'),sumMetric(t2,g.key,'forecast'),g.colT2,'Т2')+candlePair(sumMetric(mmb,g.key,'plan'),sumMetric(mmb,g.key,'forecast'),g.colMMB,'ММБ')+'</div></div>';});
 const chartLegend='<div style="display:flex;gap:20px;justify-content:center;margin-bottom:14px"><div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)"><div style="width:24px;height:8px;border-radius:2px;background:rgba(255,255,255,0.2)"></div>План</div><div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)"><div style="width:24px;height:8px;border-radius:2px;background:var(--accent)"></div>Прогноз</div></div>';
-
 const topShops=[...APP.data.shops].map(s=>({...s,rPct:shopRatingPct(s)})).sort((a,b)=>b.rPct-a.rPct).slice(0,3);
 let top3ShopsHtml='<div class="sec-hdr"><div class="sec-title">Топ магазины</div><div class="sec-badge">по рейтингу</div><div class="sec-line"></div></div><div class="top3-groups" style="grid-template-columns:repeat(3,1fr)">';
 topShops.forEach((s,i)=>{const rc=['r1','r2','r3'][i];top3ShopsHtml+='<div class="top3-card" onclick="openShopDetail(\''+s.kod.replace(/'/g,"\\'")+'\');goPage(\'allshops\')"><div class="top3-rank '+rc+'">'+(i+1)+'</div><div style="font-size:28px">🏪</div><div class="top3-info"><div class="top3-name">'+s.kod+'</div><div class="top3-sub">'+s.name.slice(0,35)+'</div><div class="top3-sub" style="margin-top:2px"><span class="'+(s.brand==='Т2'?'tag-t2':'tag-mmb')+'">'+s.brand+'</span></div></div><div class="top3-score" style="color:'+pctColor(s.rPct)+'">'+s.rPct+'%</div></div>';});
 top3ShopsHtml+='</div>';
-
 _id('page-home').innerHTML=kpis+top3Sec+top3ShopsHtml+'<div class="sec-hdr"><div class="sec-title">Прогноз продаж</div><div class="sec-badge">Т2 vs ММБ</div><div class="sec-line"></div></div><div class="chart-card">'+chartLegend+'<div style="display:flex;gap:8px;padding:0 8px">'+candleGroupsHtml+'</div></div>';
 }
 window.setHomeFilter=function(f){homeNetFilter=f;renderHome();};
@@ -693,27 +673,13 @@ const content='<div class="detail-back" onclick="'+backFn+'">← Назад</div
 _id('page-'+activePage).innerHTML=content;
 }
 
+// ИСПРАВЛЕНИЕ 2 и 3: Кнопка назад в профиль + Хатипов
 function openPersonDetail(pageId,name){
+APP.previousPage=pageId;
 const D=APP.data;const ratingMap={curators:'curators',topk:'topk',zam:'zam'};
 const ratKey=ratingMap[pageId];
 const person=ratKey?D.ratings[ratKey]?.find(p=>p.name===name):null;
-// Хатипов — двойная роль
-const isKhatipov=name.includes('Хатипов');
-const allRoles=[];
-if(pageId==='curators')allRoles.push('curator');
-if(pageId==='topk')allRoles.push('topk');
-if(pageId==='zam')allRoles.push('zam');
-if(isKhatipov){
-if(!allRoles.includes('curator')&&D.shops.some(s=>s.curator===name))allRoles.push('curator');
-if(!allRoles.includes('topk')&&D.shops.some(s=>s.topk===name))allRoles.push('topk');
-if(!allRoles.includes('zam')&&D.shops.some(s=>s.zam===name))allRoles.push('zam');
-}
-let currentRole=allRoles.includes(pageId)?pageId:(allRoles[0]||pageId);
-
-function getMyShops(role){
-return D.shops.filter(s=>(role==='curators'&&s.curator===name)||(role==='topk'&&s.topk===name)||(role==='zam'&&s.zam===name));
-}
-const myShops=getMyShops(pageId);
+const myShops=D.shops.filter(s=>(pageId==='curators'&&s.curator===name)||(pageId==='topk'&&s.topk===name)||(pageId==='zam'&&s.zam===name));
 const agg={};
 METRIC_DEFS.forEach(d=>{
 const planSum=myShops.reduce((s,sh)=>s+(sh[d.key]?.plan||0),0);
@@ -726,7 +692,7 @@ let kpisH='<div class="kpi-grid">';
 METRIC_DEFS.forEach((d,i)=>{kpisH+=kpiCardHtml(d.label,agg[d.key].fact,agg[d.key].plan,agg[d.key].forecast,COLORS[i%COLORS.length]);});
 kpisH+='</div>';
 
-// Карточки лучших магазинов по каждому показателю
+// ИСПРАВЛЕНИЕ 4: Лучшие магазины с план/факт/прогноз
 let bestShopsH='';
 if(myShops.length>0){
 bestShopsH='<div class="sec-hdr"><div class="sec-title">Лучшие магазины по показателям</div><div class="sec-badge">топ по прогнозу</div><div class="sec-line"></div></div><div class="kpi-grid">';
@@ -738,43 +704,18 @@ return bp-ap;
 })[0];
 if(best){
 const pctVal=best[d.key].forecast/best[d.key].plan*100;
-bestShopsH+='<div class="kpi-card '+COLORS[i%COLORS.length]+'" style="cursor:pointer" onclick="openShopDetail(\''+best.kod.replace(/'/g,"\\'")+'\')"><div class="kpi-label">'+d.label+' · лучший</div><div class="kpi-pct-row">'+pctBadge(Math.round(pctVal),16)+'<div style="font-size:11px;font-weight:700;color:var(--white);text-align:right;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+best.kod+'</div></div><div class="kpi-prog-track"><div class="kpi-prog-fill" style="width:'+Math.min(pctVal,100)+'%;background:'+pctColor(pctVal)+'"></div></div></div>';
+bestShopsH+='<div class="kpi-card '+COLORS[i%COLORS.length]+'" style="cursor:pointer" onclick="openShopDetail(\''+best.kod.replace(/'/g,"\\'")+'\')"><div class="kpi-label">'+d.label+' · лучший</div><div class="kpi-pct-row">'+pctBadge(Math.round(pctVal),16)+'<div style="font-size:11px;font-weight:700;color:var(--white);text-align:right;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+best.kod+'</div></div><div class="kpi-prog-track"><div class="kpi-prog-fill" style="width:'+Math.min(pctVal,100)+'%;background:'+pctColor(pctVal)+'"></div></div><div class="kpi-bottom"><div class="kpi-bottom-item"><span class="kpi-bottom-lbl">ПЛАН</span><span class="kpi-bottom-val">'+fmt(best[d.key].plan)+'</span></div><div class="kpi-divider"></div><div class="kpi-bottom-item"><span class="kpi-bottom-lbl">ФАКТ</span><span class="kpi-bottom-val">'+fmt(best[d.key].fact)+'</span></div></div></div>';
 }
 });
 bestShopsH+='</div>';
-}
-
-let ratingH='';
-if(person){
-const barMax=Math.max(...person.coeffs,0.01);
-let barsH='';
-person.metrics.forEach((m,i)=>{
-const c=person.coeffs[i];const p2=Math.round(c*100);const h=Math.round(c/1.2*100);
-barsH+='<div class="bar-wrap"><div class="bar-pct" style="color:'+pctColor(p2)+'">'+p2+'%</div><div class="bar" style="height:'+Math.min(h,100)+'%;background:'+pctColor(p2)+'" data-tip="'+m+': '+p2+'%"></div><div class="bar-label">'+m.slice(0,6)+'</div></div>';
-});
-ratingH='<div class="sec-hdr"><div class="sec-title">Рейтинговые показатели</div><div class="sec-badge">ИТОГ: '+person.itog+' · #'+person.rank+'</div><div class="sec-line"></div></div><div class="chart-card mb16"><div class="chart-bars">'+barsH+'</div></div>';
 }
 
 const safeName=name.replace(/[^a-zA-Z0-9]/g,'_').slice(0,30);
 const roleLabels={curators:'Куратор',topk:'Топ Команда',zam:'Зам РОП'};
 const roleLabel=roleLabels[pageId]||'Сотрудник';
 const pr=APP.profiles[name]||{};
-
-let roleButtonsH='';
-if(allRoles.length>1){
-roleButtonsH='<div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">';
-allRoles.forEach(r=>{
-const rl=roleLabels[r]||r;
-const isActive=r===pageId;
-roleButtonsH+='<button class="filter-btn'+(isActive?' active':'')+'" onclick="openPersonDetail(\''+r+'\',\''+name.replace(/'/g,"\\'")+'\')">'+rl+' ('+getMyShops(r).length+' маг.)</button>';
-});
-roleButtonsH+='</div>';
-}
-
 const reportBtn=pageId==='curators'?'<div style="position:relative;display:inline-block"><button class="report-btn" onclick="togglePersonMenu(\''+safeName+'\')">📄 Отчёты ▾</button><div id="pmenu_'+safeName+'" style="display:none;position:absolute;top:110%;left:0;z-index:100;background:#0b1428;border:1px solid rgba(100,160,255,0.25);border-radius:12px;padding:8px;min-width:280px;box-shadow:0 8px 32px rgba(0,0,0,0.5)"><div style="font-size:10px;color:#5a7399;text-transform:uppercase;letter-spacing:1px;padding:4px 10px 8px;font-weight:700">Выберите отчёт</div><div class="report-menu-item" onclick="genCuratorMetricReport2(\''+name.replace(/'/g,"\\'")+'\',\'revenue\')">📊 Товарная выручка — магазины</div><div class="report-menu-item" onclick="genCuratorMetricReport2(\''+name.replace(/'/g,"\\'")+'\',\'aks\')">🛍 Аксессуары — магазины</div><div class="report-menu-item" onclick="genCuratorMetricReport2(\''+name.replace(/'/g,"\\'")+'\',\'services\')">📡 Услуги — магазины</div><div style="height:1px;background:rgba(100,160,255,0.1);margin:6px 0"></div><div class="report-menu-item" onclick="genPersonReport(\''+name.replace(/'/g,"\\'")+'\',\'full\')">📋 Общее выполнение планов</div><div class="report-menu-item" onclick="genPersonReport(\''+name.replace(/'/g,"\\'")+'\',\'vmp\')">📐 ВМП с разбивкой</div><div class="report-menu-item" onclick="genPersonReport(\''+name.replace(/'/g,"\\'")+'\',\'shops\')">🏪 Рейтинг магазинов</div><div style="height:1px;background:rgba(100,160,255,0.1);margin:6px 0"></div><div class="report-menu-item" onclick="genPersonReport(\''+name.replace(/'/g,"\\'")+'\',\'all\')" style="color:#00d4ff;border-color:rgba(0,212,255,0.3)">⬇ Все отчёты сразу</div></div></div>':'';
-
-const content='<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap"><div class="detail-back" style="margin-bottom:0" onclick="renderRatingPage(\'page-'+pageId+'\',APP.data.ratings.'+(ratKey||'curators')+',\''+roleLabel+'\')">← Назад</div>'+reportBtn+'</div>'+roleButtonsH+'<div class="detail-header">'+avatarHtml(name,72)+'<div class="detail-info"><div class="detail-name">'+name+'</div><div class="detail-role">'+roleLabel+(person?' · Рейтинг #'+person.rank:'')+'</div><div style="margin-top:8px;display:flex;gap:16px;flex-wrap:wrap">'+(pr.phone?'<span style="font-size:12px;color:var(--muted)">📞 '+pr.phone+'</span>':'')+(pr.tg?'<span style="font-size:12px;color:var(--muted)">✈ '+pr.tg+'</span>':'')+(pr.birthday?'<span style="font-size:12px;color:var(--gold)">🎂 '+formatBirthday(pr.birthday)+'</span>':'')+'<span style="font-size:12px;color:var(--muted)">'+myShops.length+' магазинов</span></div></div></div><div class="sec-hdr" style="margin-top:0"><div class="sec-title">Сводка по показателям</div><div class="sec-badge">'+myShops.length+' магазинов</div><div class="sec-line"></div></div>'+kpisH+bestShopsH+ratingH+'<div class="sec-hdr"><div class="sec-title">Магазины</div><div class="sec-badge">'+myShops.length+' точек</div><div class="sec-line"></div></div>'+shopTableHtml(myShops,'kod',1,pageId+'_detail');
-
+const content='<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap"><div class="detail-back" style="margin-bottom:0" onclick="navTo(\'profiles\')">← Назад к профилям</div>'+reportBtn+'</div><div class="detail-header">'+avatarHtml(name,72)+'<div class="detail-info"><div class="detail-name">'+name+'</div><div class="detail-role">'+roleLabel+(person?' · Рейтинг #'+person.rank:'')+'</div><div style="margin-top:8px;display:flex;gap:16px;flex-wrap:wrap">'+(pr.phone?'<span style="font-size:12px;color:var(--muted)">📞 '+pr.phone+'</span>':'')+(pr.tg?'<span style="font-size:12px;color:var(--muted)">✈ '+pr.tg+'</span>':'')+(pr.birthday?'<span style="font-size:12px;color:var(--gold)">🎂 '+formatBirthday(pr.birthday)+'</span>':'')+'<span style="font-size:12px;color:var(--muted)">'+myShops.length+' магазинов</span></div></div></div><div class="sec-hdr" style="margin-top:0"><div class="sec-title">Сводка по показателям</div><div class="sec-badge">'+myShops.length+' магазинов</div><div class="sec-line"></div></div>'+kpisH+bestShopsH+'<div class="sec-hdr"><div class="sec-title">Магазины</div><div class="sec-badge">'+myShops.length+' точек</div><div class="sec-line"></div></div>'+shopTableHtml(myShops,'kod',1,pageId+'_detail');
 let _detailSortKey='kod',_detailSortDir=1;
 window['__shopColSort_'+pageId+'_detail']=function(key){
 if(_detailSortKey===key)_detailSortDir*=-1;
@@ -797,10 +738,9 @@ function getCuratorBrand(name){for(const k of Object.keys(CURATOR_BRANDS_MAP)){i
 
 function renderRatingPage(pageElId,arr,title){
 const el=_id(pageElId);const pageId=pageElId.replace('page-','');
-// Фильтрация по реальному закреплению
 const keyMap={curators:'curator',topk:'topk',zam:'zam'};
 const k=keyMap[pageId];
-const filteredArr=arr.filter(p=>APP.data.shops.some(s=>s[k]===p.name)).map((p,idx)=>({...p,rank:idx+1}));
+const filteredArr=arr.filter(p=>APP.data.shops.some(s=>s[k]===p.name));
 if(!filteredArr?.length){el.innerHTML='<div class="empty-state">Нет данных</div>';return;}
 const METRICS=filteredArr[0]?.metrics||['Товарка','Аксессуары','Кредит','Услуги','ВМП','АКС Приоритет'];
 const isRatingPage=pageId==='curators'||pageId==='topk'||pageId==='zam';
@@ -901,10 +841,10 @@ window['__shopSearch_'+pageId]=function(q){searchQ=q;applyFilters();refreshTable
 window['__shopColSort_'+pageId]=function(key){if(sortKey===key)sortDir*=-1;else{sortKey=key;sortDir=(key==='kod'||key==='name')?1:-1;}refreshTable();};
 }
 
+// ИСПРАВЛЕНИЕ 3: Убрана вторая кнопка у Хатипова в профилях
 function renderProfiles(){
 const D=APP.data;
 const all=[];
-// Фильтрация: только те, у кого есть магазины
 D.ratings.curators.filter(p=>D.shops.some(s=>s.curator===p.name)).forEach(p=>all.push({...p,role:'curator',roleLabel:'Куратор'}));
 D.ratings.topk.filter(p=>D.shops.some(s=>s.topk===p.name)).forEach(p=>all.push({...p,role:'topk',roleLabel:'Топ Команда'}));
 D.ratings.zam.filter(p=>D.shops.some(s=>s.zam===p.name)).forEach(p=>all.push({...p,role:'zam',roleLabel:'Зам РОП'}));
@@ -919,23 +859,7 @@ const myShops=D.shops.filter(s=>(p.role==='curator'&&s.curator===p.name)||(p.rol
 const revForecast=myShops.reduce((s,sh)=>s+(sh.revenue?.forecast||0),0);
 const revPlan=myShops.reduce((s,sh)=>s+(sh.revenue?.plan||0),0);
 const revPct=revPlan>0?Math.round(revForecast/revPlan*100):0;
-// Хатипов — двойная роль
-const isKhatipov=p.name.includes('Хатипов');
-const allRoles=[];
-if(isKhatipov){
-if(D.shops.some(s=>s.curator===p.name))allRoles.push('curators');
-if(D.shops.some(s=>s.topk===p.name))allRoles.push('topk');
-if(D.shops.some(s=>s.zam===p.name))allRoles.push('zam');
-}
-let secondBtn='';
-if(allRoles.length>1){
-const otherRole=allRoles.find(r=>r!==p.role);
-if(otherRole){
-const rl={curators:'Куратор',topk:'Топ Команда',zam:'Зам РОП'}[otherRole];
-secondBtn='<button class="profile-btn-secondary" onclick="openPersonDetail(\''+otherRole+'\',\''+p.name.replace(/'/g,"\\'")+'\');goPage(\''+otherRole+'\')">📊 как '+rl+' →</button>';
-}
-}
-return'<div class="profile-card" data-role="'+p.role+'"><div class="profile-avatar">'+(pr.photo?'<img src="'+pr.photo+'">':'<span>'+initials(p.name)+'</span>')+'<div class="profile-edit-ico" onclick="event.stopPropagation();openPM(\''+p.name.replace(/'/g,"\\'")+'\')">✎</div></div><div class="profile-name">'+p.name+'</div><div class="profile-role role-'+p.role+'">'+p.roleLabel+' · #'+p.rank+'</div>'+(pr.birthday?'<div class="profile-contact">🎂 '+formatBirthday(pr.birthday)+'</div>':'')+(pr.phone?'<div class="profile-contact">📞 '+pr.phone+'</div>':'')+(pr.tg?'<div class="profile-contact">✈ '+pr.tg+'</div>':'')+'<div class="profile-stats"><div class="pstat"><div class="pstat-val">'+myShops.length+'</div><div class="pstat-lbl">Магазинов</div></div><div class="pstat"><div class="pstat-val" style="color:'+pctColor(revPct)+'">'+revPct+'%</div><div class="pstat-lbl">Выручка</div></div><div class="pstat"><div class="pstat-val">'+p.itog+'</div><div class="pstat-lbl">ИТОГ</div></div><div class="pstat"><div class="pstat-val">'+p.rank+'</div><div class="pstat-lbl">Место</div></div></div><button class="profile-btn" onclick="openPersonDetail(\''+(p.role==='curator'?'curators':p.role==='topk'?'topk':'zam')+'\',\''+p.name.replace(/'/g,"\\'")+'\');goPage(\''+(p.role==='curator'?'curators':p.role==='topk'?'topk':'zam')+'\')">📊 Показатели и магазины →</button>'+secondBtn+'</div>';
+return'<div class="profile-card" data-role="'+p.role+'"><div class="profile-avatar">'+(pr.photo?'<img src="'+pr.photo+'">':'<span>'+initials(p.name)+'</span>')+'<div class="profile-edit-ico" onclick="event.stopPropagation();openPM(\''+p.name.replace(/'/g,"\\'")+'\')">✎</div></div><div class="profile-name">'+p.name+'</div><div class="profile-role role-'+p.role+'">'+p.roleLabel+' · #'+p.rank+'</div>'+(pr.birthday?'<div class="profile-contact">🎂 '+formatBirthday(pr.birthday)+'</div>':'')+(pr.phone?'<div class="profile-contact">📞 '+pr.phone+'</div>':'')+(pr.tg?'<div class="profile-contact">✈ '+pr.tg+'</div>':'')+'<div class="profile-stats"><div class="pstat"><div class="pstat-val">'+myShops.length+'</div><div class="pstat-lbl">Магазинов</div></div><div class="pstat"><div class="pstat-val" style="color:'+pctColor(revPct)+'">'+revPct+'%</div><div class="pstat-lbl">Выручка</div></div><div class="pstat"><div class="pstat-val">'+p.itog+'</div><div class="pstat-lbl">ИТОГ</div></div><div class="pstat"><div class="pstat-val">'+p.rank+'</div><div class="pstat-lbl">Место</div></div></div><button class="profile-btn" onclick="openPersonDetail(\''+(p.role==='curator'?'curators':p.role==='topk'?'topk':'zam')+'\',\''+p.name.replace(/'/g,"\\'")+'\');goPage(\''+(p.role==='curator'?'curators':p.role==='topk'?'topk':'zam')+'\')">📊 Показатели и магазины →</button></div>';
 }).join('')+'</div>';
 }
 html+='<div id="profiles-list">'+buildCards(uniq)+'</div>';
@@ -987,7 +911,7 @@ setProgress(60,'Парсим данные...');
 const parsed=parseWorkbook(wb);
 setProgress(75,'Сохраняем в облако...');
 const now=Date.now();
-if(APP.uploadType==='final'){const lbl=prompt('Метка архива (например: Май 2026):\\nФайл сохранится в историю месяцев.','');if(lbl){setProgress(80,'Сохраняем в историю...');await DB.saveHistory(lbl,parsed);}}
+if(APP.uploadType==='final'){const lbl=prompt('Метка архива (например: Май 2026):\nФайл сохранится в историю месяцев.','');if(lbl){setProgress(80,'Сохраняем в историю...');await DB.saveHistory(lbl,parsed);}}
 setProgress(85,'Синхронизируем...');
 const saved=await DB.saveData(parsed,'user');
 if(saved){setProgress(95,'Готово!');console.log('Данные сохранены в Supabase');}
@@ -1054,7 +978,6 @@ if(r[5]==='Вес:')wI=i;
 const ratings={topk:tI>=0?exBlock(tI,wI>=0?wI:tI+25):[],curators:cI>=0?exBlock(cI,zI>=0?zI:cI+30):[],zam:zI>=0?exBlock(zI,zI+5):[]};
 function uq(arr){const s=new Set(),o=[];arr.forEach(x=>{if(x&&!s.has(x)){s.add(x);o.push(x);}});return o;}
 const staff={curators:uq(shops.map(s=>s.curator)),topk:uq(shops.map(s=>s.topk)),zam:uq(shops.map(s=>s.zam))};
-// Фильтрация рейтингов по реальному закреплению
 ratings.topk=ratings.topk.filter(p=>staff.topk.includes(p.name));
 ratings.curators=ratings.curators.filter(p=>staff.curators.includes(p.name));
 ratings.zam=ratings.zam.filter(p=>staff.zam.includes(p.name));
@@ -1080,7 +1003,7 @@ ctx.beginPath();ctx.moveTo(18,60);ctx.lineTo(30,33);ctx.lineTo(42,60);ctx.closeP
 ctx.font='bold 18px Arial';ctx.fillStyle='#1a6fc4';ctx.fillText('МАКСИМУС',90,42);
 ctx.font='9px Arial';ctx.fillStyle=RPT.MUTED;ctx.fillText('мобильная связь и техника',90,58);
 ctx.fillStyle='rgba(100,160,255,0.15)';ctx.fillRect(88,66,1,24);
-ctx.font='bold 24px Arial';const titleW=ctx.measureText(title).width;const titleX=(W-titleW)/2,titleY=52;
+ctx.font='bold 24px Arial';const titleW=ctx.measureText(title).width;const titleX=102,titleY=52;
 const titleGrad=ctx.createLinearGradient(titleX-8,titleY-20,titleX+titleW+16,titleY+8);titleGrad.addColorStop(0,'rgba(45,140,255,0.15)');titleGrad.addColorStop(1,'rgba(0,212,255,0.08)');ctx.fillStyle=titleGrad;
 const padX=12,padY=8,radius=8;const bx=titleX-padX,by=titleY-22-padY/2,bw=titleW+padX*2,bh=32+padY;
 ctx.beginPath();ctx.moveTo(bx+radius,by);ctx.lineTo(bx+bw-radius,by);ctx.arcTo(bx+bw,by,bx+bw,by+radius,radius);ctx.lineTo(bx+bw,by+bh-radius);ctx.arcTo(bx+bw,by+bh,bx+bw-radius,by+bh,radius);ctx.lineTo(bx+radius,by+bh);ctx.arcTo(bx,by+bh,bx,by+bh-radius,radius);ctx.lineTo(bx,by+radius);ctx.arcTo(bx,by,bx+radius,by,radius);ctx.closePath();ctx.fill();
@@ -1229,6 +1152,7 @@ _id('page-home').classList.add('active');
 _loadAppData();
 }else{_id('login-err').textContent='Неверный логин или пароль';}
 }
+
 function _loadAppData(){
 Promise.all([DB.loadData(),DB.loadProfiles()]).then(([cd,pr])=>{
 if(cd&&cd.data&&cd.data.shops&&cd.data.shops.length>0){APP.data=cd.data;if(cd.uploaded_at)localStorage.setItem('mx_last_upload_ts',new Date(cd.uploaded_at).getTime().toString());}
@@ -1239,7 +1163,6 @@ APP.profiles=pr||{};updateLastUploadInfo();renderAll();updateBdayBanner();startP
 
 document.getElementById('l-pass')?.addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
 
-// Автовход если сессия активна (7 дней)
 (function(){
 const ts=localStorage.getItem('mx_auth_ts');
 if(ts&&(Date.now()-parseInt(ts))<SEVEN_DAYS){
@@ -1313,11 +1236,13 @@ html+='<div class="settings-section"><div class="settings-item"><div><div class=
 if(configs.length===0)html+='<div class="empty-state">Нет настроенных отчётов</div>';
 el.innerHTML=html;
 }
+
 function checkSettingsPass(){
 const p=_id('settings-pass').value;
 if(p==='1234567890'){settingsAuth=true;renderSettings();}
 else{alert('Неверный пароль');}
 }
+
 let editingConfigIdx=-1;
 function openSettingsModal(idx){
 editingConfigIdx=idx??-1;
@@ -1333,7 +1258,9 @@ _id('sm-name').value='';_id('sm-page').value='t2';_id('sm-metric').value='revenu
 }
 _id('settings-modal').classList.add('show');
 }
+
 function closeSettingsModal(){_id('settings-modal').classList.remove('show');editingConfigIdx=-1;}
+
 function saveReportConfig(){
 const configs=JSON.parse(localStorage.getItem('mx_report_configs')||'[]');
 const cfg={name:_id('sm-name').value.trim(),page:_id('sm-page').value,metric:_id('sm-metric').value,type:_id('sm-type').value,count:parseInt(_id('sm-count').value)||20};
@@ -1343,7 +1270,9 @@ else configs.push(cfg);
 localStorage.setItem('mx_report_configs',JSON.stringify(configs));
 closeSettingsModal();renderSettings();
 }
+
 function editReportConfig(idx){openSettingsModal(idx);}
+
 function deleteReportConfig(idx){
 if(!confirm('Удалить отчёт?'))return;
 const configs=JSON.parse(localStorage.getItem('mx_report_configs')||'[]');
