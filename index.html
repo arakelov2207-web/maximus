@@ -1145,6 +1145,16 @@ function showReportMenu(id){const el=_id('report-menu-'+id);if(!el)return;el.sty
 function togglePersonMenu(safeName){const el=_id('pmenu_'+safeName);if(!el)return;document.querySelectorAll('[id^="pmenu_"]').forEach(m=>{if(m!==el)m.style.display='none';});el.style.display=el.style.display==='none'?'block':'none';}
 document.addEventListener('click',function(e){if(!e.target.closest('[id^="pmenu_"]')&&!e.target.closest('.report-btn')){document.querySelectorAll('[id^="pmenu_"]').forEach(m=>m.style.display='none');}});
 
+
+// Автоматический расчет ширины canvas на основе столбцов
+function calculateCanvasWidth(cols, padding = 60) {
+  return cols.reduce((sum, col) => sum + col.w, 0) + padding;
+}
+
+// Автоматический расчет высоты canvas на основе количества строк
+function calculateCanvasHeight(headerHeight, rowCount, rowHeight, padding = 80) {
+  return headerHeight + (rowCount + 1) * rowHeight + padding;
+}
 const RPT={BG:'#060c1a',CARD:'#0f1e38',CARD2:'#0b1428',BORDER:'#1a3050',WHITE:'#eaf2ff',TEXT:'#c8ddf5',MUTED:'#5a7399',GREEN:'#38ffb0',YELLOW:'#ffc847',RED:'#ff4d6d',BLUE:'#2d8cff',CYAN:'#00d4ff',GOLD:'#ffc847',
 pctColor(p){return p>=100?RPT.GREEN:p>=80?RPT.YELLOW:RPT.RED;},
 fmt(n){if(!n||isNaN(n))return'0';return Math.round(n).toLocaleString('ru-RU');},
@@ -1242,7 +1252,10 @@ const info=METRIC_INFO[metricKey];if(!info)return;
 const myShops=APP.data.shops.filter(s=>s.curator===curatorName);
 if(!myShops.length){alert('Нет магазинов');return;}
 const rows=[...myShops].map(s=>{const m=s[info.shopKey];const pct=m.plan>0?Math.round(m.forecast/m.plan*100):0;const fPct=m.plan>0?Math.round(m.fact/m.plan*100):0;return{...s,pct,fPct,m};}).sort((a,b)=>b.pct-a.pct);
-const W=860,ROW_H=44;const H=96+40+ROW_H*(rows.length+1)+50;
+const ROW_H=44;
+const COLS=[{label:'#',w:40},{label:'Код',w:80},{label:'Магазин',w:200},{label:'Бренд',w:60},{label:'%пр',w:80},{label:'Прогноз',w:110},{label:'План',w:110},{label:'Факт',w:100},{label:'%факта',w:80}];
+const W=calculateCanvasWidth(COLS);
+const H=calculateCanvasHeight(96, rows.length, ROW_H);
 const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;const ctx=canvas.getContext('2d');
 ctx.fillStyle=RPT.BG;ctx.fillRect(0,0,W,H);
 let y=RPT.drawHeader(ctx,W,info.label+' · '+curatorName.split(' ')[0],myShops.length+' магазинов · сортировка ↓');
@@ -1288,7 +1301,10 @@ RPT.download(canvas,'планы_'+curatorName.split(' ')[0]+'_'+new Date().toLoc
 
 function genPersonSection_vmp(curatorName,myShops){
 const sorted=[...myShops].sort((a,b)=>b.vmp-a.vmp);
-const W=1100,ROW_H=44;const H=96+40+ROW_H*(sorted.length+1)+50;
+const ROW_H=44;
+const COLS=[{label:'#',w:40},{label:'Код',w:75},{label:'Магазин',w:220},{label:'Бренд',w:58},{label:'ВМП коэф',w:85},{label:'Аксы %',w:88},{label:'Настр %',w:88},{label:'Страх %',w:88},{label:'Ср %',w:90},{label:'',w:180}];
+const W=calculateCanvasWidth(COLS);
+const H=calculateCanvasHeight(96, sorted.length, ROW_H);
 const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;const ctx=canvas.getContext('2d');
 ctx.fillStyle=RPT.BG;ctx.fillRect(0,0,W,H);
 let y=RPT.drawHeader(ctx,W,'ВМП · '+curatorName.split(' ')[0],'разбивка: Аксессуары · Настройки · Страховки');
@@ -1302,7 +1318,10 @@ RPT.download(canvas,'ВМП_'+curatorName.split(' ')[0]+'_'+new Date().toLocaleD
 
 function genPersonSection_shops(curatorName,myShops){
 const sorted=[...myShops].map(s=>({...s,rPct:shopRatingPct(s)})).sort((a,b)=>b.rPct-a.rPct);
-const W=1200,ROW_H=44;const H=96+40+ROW_H*(sorted.length+1)+50;
+const ROW_H=44;
+const COLS=[{label:'#',w:40},{label:'Код',w:75},{label:'Магазин',w:220},{label:'Бренд',w:55},{label:'Рейтинг',w:80},{label:'СТО %',w:80},{label:'Аксы %',w:80},{label:'Кредит %',w:82},{label:'Услуги %',w:82},{label:'Выручка %',w:100},{label:'',w:150}];
+const W=calculateCanvasWidth(COLS);
+const H=calculateCanvasHeight(96, sorted.length, ROW_H);
 const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;const ctx=canvas.getContext('2d');
 ctx.fillStyle=RPT.BG;ctx.fillRect(0,0,W,H);
 let y=RPT.drawHeader(ctx,W,'Рейтинг магазинов · '+curatorName.split(' ')[0],sorted.length+' точек · СТО·Аксы·Кредит·Услуги');
