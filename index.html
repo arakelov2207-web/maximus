@@ -511,7 +511,7 @@ const APP={data:EMPTY_DATA,profiles:{},history:[],uploadType:'daily',editingProf
 function openSidebar(){_id('sidebar').classList.add('open');_id('mob-overlay').classList.add('show');document.body.style.overflow='hidden';}
 function closeSidebar(){_id('sidebar').classList.remove('open');_id('mob-overlay').classList.remove('show');document.body.style.overflow='';}
 function navTo(pageId){
-APP.previousPage=(APP.currentPage==='profiles'?'profiles':pageId);
+APP.previousPage=pageId;
 document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
 const dt=document.querySelector('.nav-tab[data-page="'+pageId+'"]');if(dt)dt.classList.add('active');
 document.querySelectorAll('.sidebar-tab').forEach(t=>t.classList.remove('active'));
@@ -675,7 +675,7 @@ _id('page-'+activePage).innerHTML=content;
 
 // ИСПРАВЛЕНИЕ 2 и 3: Кнопка назад в профиль + Хатипов
 function openPersonDetail(pageId,name){
-APP.previousPage=(APP.currentPage==='profiles'?'profiles':pageId);
+APP.previousPage=pageId;
 const D=APP.data;const ratingMap={curators:'curators',topk:'topk',zam:'zam'};
 const ratKey=ratingMap[pageId];
 const person=ratKey?D.ratings[ratKey]?.find(p=>p.name===name):null;
@@ -1003,7 +1003,7 @@ ctx.beginPath();ctx.moveTo(18,60);ctx.lineTo(30,33);ctx.lineTo(42,60);ctx.closeP
 ctx.font='bold 18px Arial';ctx.fillStyle='#1a6fc4';ctx.fillText('МАКСИМУС',90,42);
 ctx.font='9px Arial';ctx.fillStyle=RPT.MUTED;ctx.fillText('мобильная связь и техника',90,58);
 ctx.fillStyle='rgba(100,160,255,0.15)';ctx.fillRect(88,66,1,24);
-ctx.font='bold 24px Arial';const titleW=ctx.measureText(title).width;const titleW=ctx.measureText(title).width;const titleX=Math.max(180,(W-titleW)/2),titleY=52;
+ctx.font='bold 24px Arial';const titleW=ctx.measureText(title).width;const titleX=(W-titleW)/2,titleY=52;  // Центрируем заголовок
 const titleGrad=ctx.createLinearGradient(titleX-8,titleY-20,titleX+titleW+16,titleY+8);titleGrad.addColorStop(0,'rgba(45,140,255,0.15)');titleGrad.addColorStop(1,'rgba(0,212,255,0.08)');ctx.fillStyle=titleGrad;
 const padX=12,padY=8,radius=8;const bx=titleX-padX,by=titleY-22-padY/2,bw=titleW+padX*2,bh=32+padY;
 ctx.beginPath();ctx.moveTo(bx+radius,by);ctx.lineTo(bx+bw-radius,by);ctx.arcTo(bx+bw,by,bx+bw,by+radius,radius);ctx.lineTo(bx+bw,by+bh-radius);ctx.arcTo(bx+bw,by+bh,bx+bw-radius,by+bh,radius);ctx.lineTo(bx+radius,by+bh);ctx.arcTo(bx,by+bh,bx,by+bh-radius,radius);ctx.lineTo(bx,by+radius);ctx.arcTo(bx,by,bx+radius,by,radius);ctx.closePath();ctx.fill();
@@ -1063,6 +1063,7 @@ RPT.download(canvas,info.label.replace(/ /g,'_')+'_кураторы_'+new Date()
 function genCuratorMetricReport2(curatorName,metricKey){
 const METRIC_INFO={revenue:{label:'Товарная выручка',shopKey:'revenue'},aks:{label:'Аксессуары',shopKey:'aks'},services:{label:'Услуги',shopKey:'services'}};
 const info=METRIC_INFO[metricKey];if(!info)return;
+// Хатипов всегда как куратор (уже корректно - s.curator===curatorName)
 const myShops=APP.data.shops.filter(s=>s.curator===curatorName);
 if(!myShops.length){alert('Нет магазинов');return;}
 const rows=[...myShops].map(s=>{const m=s[info.shopKey];const pct=m.plan>0?Math.round(m.forecast/m.plan*100):0;const fPct=m.plan>0?Math.round(m.fact/m.plan*100):0;return{...s,pct,fPct,m};}).sort((a,b)=>b.pct-a.pct);
@@ -1079,7 +1080,11 @@ RPT.download(canvas,info.label+'_'+curatorName.split(' ')[0]+'_'+new Date().toLo
 }
 
 function genPersonReport(curatorName,section){
-const myShops=APP.data.shops.filter(s=>s.curator===curatorName||s.topk===curatorName||s.zam===curatorName);
+// Для Хатипова всегда используем только кураторские магазины (9 штук), а не все 149
+const isKhatipov = curatorName.includes('Хатипов');
+const myShops = isKhatipov 
+    ? APP.data.shops.filter(s=>s.curator===curatorName)  // Хатипов только как куратор
+    : APP.data.shops.filter(s=>s.curator===curatorName||s.topk===curatorName||s.zam===curatorName);
 if(!myShops.length){alert('Нет магазинов');return;}
 if(section==='all'){genPersonSection_full(curatorName,myShops);setTimeout(()=>genPersonSection_vmp(curatorName,myShops),300);setTimeout(()=>genPersonSection_shops(curatorName,myShops),600);return;}
 if(section==='full')genPersonSection_full(curatorName,myShops);
@@ -1298,7 +1303,7 @@ const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;con
 ctx.fillStyle='#060c1a';ctx.fillRect(0,0,W,H);
 let y=RPT.drawHeader(ctx,W,metric.label+' — '+title,'сортировка по % прогноза ↓');
 ctx.font='12px Arial';ctx.fillStyle='#5a7399';ctx.fillText('Прогноз / План / Факт по каждому сотруднику',24,y+20);y+=36;
-const COLS=[{label:'#',w:50},{label:'Сотрудник',w:380},{label:'Магазинов',w:90},{label:'% прогноза',w:110},{label:'Прогноз',w:120},{label:'План',w:110},{label:'Факт',w:110},{label:'',w:30}];
+const COLS=[{label:'#',w:50},{label:'Сотрудник',w:280},{label:'Магазинов',w:90},{label:'% прогноза',w:110},{label:'Прогноз',w:120},{label:'План',w:110},{label:'Факт',w:110},{label:'',w:30}];
 RPT.drawTableRow(ctx,W,y,COLS,true);y+=ROW_H;
 rows.forEach((r,i)=>{const rankColors=['#ffc847','#c0c0c0','#cd7f32'];const rColor=i<3?rankColors[i]:'#c8ddf5';const pctColor=r.pct>=100?'#38ffb0':r.pct>=80?'#ffc847':'#ff4d6d';const cols=[{value:String(r.rank),bold:true,color:rColor},{value:r.name,align:'left',color:'#eaf2ff',bold:i<3},{value:String(r.shops),color:'#5a7399'},{value:r.pct+'%',bold:true,color:pctColor},{value:RPT.fmt(r.forecast),bold:true,color:'#eaf2ff'},{value:RPT.fmt(r.plan),color:'#5a7399'},{value:RPT.fmt(r.fact),color:pctColor},{value:'',w:30}].map((col,ci)=>({...col,w:COLS[ci].w}));y=RPT.drawTableRow(ctx,W,y,cols,false,r.pct);RPT.drawBar(ctx,50+280+90,y-10,110+120+110+110,r.pct,10);});
 y+=14;ctx.font='11px Arial';ctx.fillStyle='#5a7399';ctx.fillText('Сформировано: '+new Date().toLocaleString('ru-RU')+' · МАКСИМУС',24,y+16);
