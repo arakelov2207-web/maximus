@@ -1089,12 +1089,27 @@ const totalAks=shops.reduce((s,sh)=>s+(sh.aks?.forecast||0),0);
 const totalIns=shops.reduce((s,sh)=>s+(sh.insurance?.forecast||0),0);
 const totalSet=shops.reduce((s,sh)=>s+(sh.settings?.forecast||0),0);
 const totalCred=shops.reduce((s,sh)=>s+(sh.credit?.forecast||0),0);
+const t2=APP.data.shops.filter(s=>s.brand==='Т2');
+const mmb=APP.data.shops.filter(s=>s.brand==='ММБ');
+const t2Rev=t2.reduce((s,sh)=>s+(sh.revenue?.forecast||0),0);
+const mmbRev=mmb.reduce((s,sh)=>s+(sh.revenue?.forecast||0),0);
+const t2Sto=t2.reduce((s,sh)=>s+(sh.sto?.forecast||0),0);
+const mmbSto=mmb.reduce((s,sh)=>s+(sh.sto?.forecast||0),0);
+const t2Aks=t2.reduce((s,sh)=>s+(sh.aks?.forecast||0),0);
+const mmbAks=mmb.reduce((s,sh)=>s+(sh.aks?.forecast||0),0);
+const t2Ins=t2.reduce((s,sh)=>s+(sh.insurance?.forecast||0),0);
+const mmbIns=mmb.reduce((s,sh)=>s+(sh.insurance?.forecast||0),0);
+const t2Set=t2.reduce((s,sh)=>s+(sh.settings?.forecast||0),0);
+const mmbSet=mmb.reduce((s,sh)=>s+(sh.settings?.forecast||0),0);
+const t2Cred=t2.reduce((s,sh)=>s+(sh.credit?.forecast||0),0);
+const mmbCred=mmb.reduce((s,sh)=>s+(sh.credit?.forecast||0),0);
 const rows=[
-{label:'Аксессуары (от Выручки)',plan:28,fact:totalRev>0?Math.round(totalAks/totalRev*100):0},
-{label:'Страховки (от СТО)',plan:4,fact:totalSto>0?Math.round(totalIns/totalSto*100):0},
-{label:'Настройки (от СТО)',plan:4,fact:totalSto>0?Math.round(totalSet/totalSto*100):0},
-{label:'Кредит (от Выручки)',plan:25,fact:totalRev>0?Math.round(totalCred/totalRev*100):0}
+{label:'Аксессуары (от Выручки)',plan:28,t2:t2Rev>0?(t2Aks/t2Rev*100):0,mmb:mmbRev>0?(mmbAks/mmbRev*100):0,total:0},
+{label:'Страховки (от СТО)',plan:4,t2:t2Sto>0?(t2Ins/t2Sto*100):0,mmb:mmbSto>0?(mmbIns/mmbSto*100):0,total:0},
+{label:'Настройки (от СТО)',plan:4,t2:t2Sto>0?(t2Set/t2Sto*100):0,mmb:mmbSto>0?(mmbSet/mmbSto*100):0,total:0},
+{label:'Кредит (от Выручки)',plan:25,t2:t2Rev>0?(t2Cred/t2Rev*100):0,mmb:mmbRev>0?(mmbCred/mmbRev*100):0,total:0}
 ];
+rows.forEach(r=>{r.total=(r.t2+r.mmb)/2;});
 const W=1000,ROW_H=60;
 const H=120+40+ROW_H*(rows.length+1)+60;
 const canvas=document.createElement('canvas');
@@ -1209,7 +1224,27 @@ const METRIC_INFO={revenue:{label:'Товарная выручка',shopKey:'rev
 const info=METRIC_INFO[metricKey];if(!info)return;
 const myShops=APP.data.shops.filter(s=>s.curator===curatorName);
 if(!myShops.length){alert('Нет магазинов');return;}
-const rows=[...myShops].map(s=>{const m=s[info.shopKey];const pct=m.plan>0?Math.round(m.forecast/m.plan*100):0;const fPct=m.plan>0?Math.round(m.fact/m.plan*100):0;return{...s,pct,fPct,m};}).sort((a,b)=>b.pct-a.pct);
+const t2=APP.data.shops.filter(s=>s.brand==='Т2');
+const mmb=APP.data.shops.filter(s=>s.brand==='ММБ');
+const t2Rev=t2.reduce((s,sh)=>s+(sh.revenue?.forecast||0),0);
+const mmbRev=mmb.reduce((s,sh)=>s+(sh.revenue?.forecast||0),0);
+const t2Sto=t2.reduce((s,sh)=>s+(sh.sto?.forecast||0),0);
+const mmbSto=mmb.reduce((s,sh)=>s+(sh.sto?.forecast||0),0);
+const t2Aks=t2.reduce((s,sh)=>s+(sh.aks?.forecast||0),0);
+const mmbAks=mmb.reduce((s,sh)=>s+(sh.aks?.forecast||0),0);
+const t2Ins=t2.reduce((s,sh)=>s+(sh.insurance?.forecast||0),0);
+const mmbIns=mmb.reduce((s,sh)=>s+(sh.insurance?.forecast||0),0);
+const t2Set=t2.reduce((s,sh)=>s+(sh.settings?.forecast||0),0);
+const mmbSet=mmb.reduce((s,sh)=>s+(sh.settings?.forecast||0),0);
+const t2Cred=t2.reduce((s,sh)=>s+(sh.credit?.forecast||0),0);
+const mmbCred=mmb.reduce((s,sh)=>s+(sh.credit?.forecast||0),0);
+const rows=[
+{label:'Аксессуары (от Выручки)',plan:28,t2:t2Rev>0?(t2Aks/t2Rev*100):0,mmb:mmbRev>0?(mmbAks/mmbRev*100):0,total:0},
+{label:'Страховки (от СТО)',plan:4,t2:t2Sto>0?(t2Ins/t2Sto*100):0,mmb:mmbSto>0?(mmbIns/mmbSto*100):0,total:0},
+{label:'Настройки (от СТО)',plan:4,t2:t2Sto>0?(t2Set/t2Sto*100):0,mmb:mmbSto>0?(mmbSet/mmbSto*100):0,total:0},
+{label:'Кредит (от Выручки)',plan:25,t2:t2Rev>0?(t2Cred/t2Rev*100):0,mmb:mmbRev>0?(mmbCred/mmbRev*100):0,total:0}
+];
+rows.forEach(r=>{r.total=(r.t2+r.mmb)/2;});const pct=m.plan>0?Math.round(m.forecast/m.plan*100):0;const fPct=m.plan>0?Math.round(m.fact/m.plan*100):0;return{...s,pct,fPct,m};}).sort((a,b)=>b.pct-a.pct);
 const W=860,ROW_H=44;const H=96+40+ROW_H*(rows.length+1)+50;
 const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;const ctx=canvas.getContext('2d');
 ctx.fillStyle=RPT.BG;ctx.fillRect(0,0,W,H);
