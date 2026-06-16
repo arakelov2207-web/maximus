@@ -511,7 +511,11 @@ const APP={data:EMPTY_DATA,profiles:{},history:[],uploadType:'daily',editingProf
 function openSidebar(){_id('sidebar').classList.add('open');_id('mob-overlay').classList.add('show');document.body.style.overflow='hidden';}
 function closeSidebar(){_id('sidebar').classList.remove('open');_id('mob-overlay').classList.remove('show');document.body.style.overflow='';}
 function navTo(pageId){
-APP.previousPage=pageId;
+// Не перезаписываем previousPage, если мы уже в профиле
+const currentPage=document.querySelector('.nav-tab.active')?.dataset?.page;
+if(currentPage!==pageId){
+APP.previousPage=currentPage||pageId;
+}
 document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
 const dt=document.querySelector('.nav-tab[data-page="'+pageId+'"]');if(dt)dt.classList.add('active');
 document.querySelectorAll('.sidebar-tab').forEach(t=>t.classList.remove('active'));
@@ -876,7 +880,9 @@ _id('page-'+activePage).innerHTML=content;
 
 // ИСПРАВЛЕНИЕ 2 и 3: Кнопка назад в профиль + Хатипов
 function openPersonDetail(pageId,name){
-APP.previousPage=pageId;
+// Сохраняем текущую активную вкладку как предыдущую страницу
+const currentPage=document.querySelector('.nav-tab.active')?.dataset?.page||'profiles';
+APP.previousPage=currentPage;
 const D=APP.data;const ratingMap={curators:'curators',topk:'topk',zam:'zam'};
 const ratKey=ratingMap[pageId];
 const person=ratKey?D.ratings[ratKey]?.find(p=>p.name===name):null;
