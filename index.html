@@ -511,17 +511,24 @@ const APP={data:EMPTY_DATA,profiles:{},history:[],uploadType:'daily',editingProf
 function openSidebar(){_id('sidebar').classList.add('open');_id('mob-overlay').classList.add('show');document.body.style.overflow='hidden';}
 function closeSidebar(){_id('sidebar').classList.remove('open');_id('mob-overlay').classList.remove('show');document.body.style.overflow='';}
 function navTo(pageId){
-// Не перезаписываем previousPage, если мы уже в профиле
-const currentPage=document.querySelector('.nav-tab.active')?.dataset?.page;
-if(currentPage!==pageId){
-APP.previousPage=currentPage||pageId;
-}
+APP.previousPage=pageId;
 document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
 const dt=document.querySelector('.nav-tab[data-page="'+pageId+'"]');if(dt)dt.classList.add('active');
 document.querySelectorAll('.sidebar-tab').forEach(t=>t.classList.remove('active'));
 const st=document.querySelector('.sidebar-tab[data-page="'+pageId+'"]');if(st)st.classList.add('active');
 document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
 _id('page-'+pageId).classList.add('active');
+// Перерисовываем контент вкладки, чтобы сбросить детальную страницу
+if(pageId==='home') renderHome();
+else if(pageId==='curators') renderRatingPage('page-curators',APP.data.ratings.curators,'Рейтинг кураторов');
+else if(pageId==='topk') renderRatingPage('page-topk',APP.data.ratings.topk,'Рейтинг · Топ Команда');
+else if(pageId==='zam') renderRatingPage('page-zam',APP.data.ratings.zam,'Рейтинг замов РОП');
+else if(pageId==='allshops') renderAllShopsPage();
+else if(pageId==='t2') renderShopsPage('t2');
+else if(pageId==='mmb') renderShopsPage('mmb');
+else if(pageId==='profiles') renderProfiles();
+else if(pageId==='bdays') renderBdays();
+else if(pageId==='settings') renderSettings();
 closeSidebar();window.scrollTo(0,0);
 }
 function goPage(id){navTo(id);}
