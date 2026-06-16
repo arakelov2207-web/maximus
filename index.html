@@ -1495,6 +1495,7 @@ else if(groupType==='zam'){staffList=APP.data.ratings.zam;pageId='zam';title='З
 else{alert('Неизвестная группа: '+groupType);return;}
 if(!staffList||staffList.length===0){alert('Нет данных');return;}
 if(metricKey==='rating'){if(groupType==='curators')genCuratorRatingReport();else genTopkRatingReport(staffList,title);return;}
+if(metricKey==='shares'){genSharesGroupReport(groupType,title);return;}
 const keyMap={curators:'curator',topk:'topk',zam:'zam'};const staffKey=keyMap[groupType];
 const rows=staffList.map(person=>{const myShops=APP.data.shops.filter(s=>s[staffKey]===person.name);const plan=myShops.reduce((s,sh)=>s+(sh[metric.shopKey]?.plan||0),0);const fact=myShops.reduce((s,sh)=>s+(sh[metric.shopKey]?.fact||0),0);const fc=myShops.reduce((s,sh)=>s+(sh[metric.shopKey]?.forecast||0),0);const pct=plan>0?Math.round(fc/plan*100):0;return{name:person.name,rank:person.rank,plan,fact,forecast:fc,pct,shops:myShops.length};}).sort((a,b)=>b.pct-a.pct);
 const W=900,ROW_H=48;const H=100+40+ROW_H*(rows.length+1)+50;
@@ -1507,6 +1508,61 @@ RPT.drawTableRow(ctx,W,y,COLS,true);y+=ROW_H;
 rows.forEach((r,i)=>{const rankColors=['#ffc847','#c0c0c0','#cd7f32'];const rColor=i<3?rankColors[i]:'#c8ddf5';const pctColor=r.pct>=100?'#38ffb0':r.pct>=80?'#ffc847':'#ff4d6d';const cols=[{value:String(r.rank),bold:true,color:rColor},{value:r.name,align:'left',color:'#eaf2ff',bold:i<3},{value:String(r.shops),color:'#5a7399'},{value:r.pct+'%',bold:true,color:pctColor},{value:RPT.fmt(r.forecast),bold:true,color:'#eaf2ff'},{value:RPT.fmt(r.plan),color:'#5a7399'},{value:RPT.fmt(r.fact),color:pctColor},{value:'',w:30}].map((col,ci)=>({...col,w:COLS[ci].w}));y=RPT.drawTableRow(ctx,W,y,cols,false,r.pct);RPT.drawBar(ctx,50+280+90,y-10,110+120+110+110,r.pct,10);});
 y+=14;ctx.font='11px Arial';ctx.fillStyle='#5a7399';ctx.fillText('Сформировано: '+new Date().toLocaleString('ru-RU')+' · МАКСИМУС',24,y+16);
 RPT.download(canvas,metric.label.replace(/ /g,'_')+'_'+groupType+'_'+new Date().toLocaleDateString('ru-RU').replace(/\./g,'-'));
+}
+
+function genSharesGroupReport(groupType,title){
+const keyMap={curators:'curator',topk:'topk',zam:'zam'};
+const staffKey=keyMap[groupType];
+const staffList=APP.data.ratings[groupType];
+const rows=staffList.map(person=>{
+const myShops=APP.data.shops.filter(s=>s[staffKey]===person.name);
+const totalRev=myShops.reduce((s,sh)=>s+(sh.revenue?.forecast||0),0);
+const totalSto=myShops.reduce((s,sh)=>s+(sh.sto?.forecast||0),0);
+const totalAks=myShops.reduce((s,sh)=>s+(sh.aks?.forecast||0),0);
+const totalIns=myShops.reduce((s,sh)=>s+(sh.insurance?.forecast||0),0);
+const totalSet=myShops.reduce((s,sh)=>s+(sh.settings?.forecast||0),0);
+const totalCred=myShops.reduce((s,sh)=>s+(sh.credit?.forecast||0),0);
+const aksShare=totalRev>0?(totalAks/totalRev*100):0;
+const insShare=totalSto>0?(totalIns/totalSto*100):0;
+const setShare=totalSto>0?(totalSet/totalSto*100):0;
+const credShare=totalRev>0?(totalCred/totalRev*100):0;
+return{name:person.name,rank:person.rank,aksShare,insShare,setShare,credShare,shops:myShops.length};
+}).sort((a,b)=>b.rank-a.rank);
+const W=1100,ROW_H=48;const H=100+40+ROW_H*(rows.length+1)+50;
+const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;const ctx=canvas.getContext('2d');
+ctx.fillStyle='#060c1a';ctx.fillRect(0,0,W,H);
+let y=RPT.drawHeader(ctx,W,'Доли показателей — '+title,'плановые доли: Аксы 28% · Страховки 4% · Настройки 4% · Кредит 25%');
+ctx.font='12px Arial';ctx.fillStyle='#5a7399';ctx.fillText('Доли показателей от выручки/СТО по каждому сотруднику',24,y+20);y+=36;
+const COLS=[
+{label:'#',w:50},
+{label:'Сотрудник',w:280},
+{label:'Магазинов',w:90},
+{label:'Аксы % (план 28%)',w:130},
+{label:'Страховки % (план 4%)',w:140},
+{label:'Настройки % (план 4%)',w:140},
+{label:'Кредит % (план 25%)',w:130}
+];
+RPT.drawTableRow(ctx,W,y,COLS,true);y+=ROW_H;
+rows.forEach((r,i)=>{
+const rankColors=['#ffc847','#c0c0c0','#cd7f32'];
+const rColor=i<3?rankColors[i]:'#c8ddf5';
+const aksColor=r.aksShare>=28?'#38ffb0':r.aksShare>=22.4?'#ffc847':'#ff4d6d';
+const insColor=r.insShare>=4?'#38ffb0':r.insShare>=3.2?'#ffc847':'#ff4d6d';
+const setColor=r.setShare>=4?'#38ffb0':r.setShare>=3.2?'#ffc847':'#ff4d6d';
+const credColor=r.credShare>=25?'#38ffb0':r.credShare>=20?'#ffc847':'#ff4d6d';
+const cols=[
+{value:String(r.rank),bold:true,color:rColor},
+{value:r.name,align:'left',color:'#eaf2ff',bold:i<3},
+{value:String(r.shops),color:'#5a7399'},
+{value:r.aksShare.toFixed(1)+'%',bold:true,color:aksColor},
+{value:r.insShare.toFixed(1)+'%',bold:true,color:insColor},
+{value:r.setShare.toFixed(1)+'%',bold:true,color:setColor},
+{value:r.credShare.toFixed(1)+'%',bold:true,color:credColor}
+].map((col,ci)=>({...col,w:COLS[ci].w}));
+y=RPT.drawTableRow(ctx,W,y,cols,false);
+});
+y+=14;ctx.font='11px Arial';ctx.fillStyle='#5a7399';ctx.fillText('Сформировано: '+new Date().toLocaleString('ru-RU')+' · МАКСИМУС',24,y+16);
+RPT.download(canvas,'доли_'+groupType+'_'+new Date().toLocaleDateString('ru-RU').replace(/\./g,'-'));
 }
 
 function genTopkRatingReport(staffList,title){
