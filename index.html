@@ -1566,16 +1566,16 @@ RPT.download(canvas,'доли_'+groupType+'_'+new Date().toLocaleDateString('ru-
 }
 
 function genTopkRatingReport(staffList,title){
-const W=900,ROW_H=48;const H=100+40+ROW_H*(staffList.length+1)+50;
+const data=[...staffList].sort((a,b)=>a.rank-b.rank);
+const W=900,ROW_H=44;const H=96+40+ROW_H*(data.length+1)+40;
 const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;const ctx=canvas.getContext('2d');
-ctx.fillStyle='#060c1a';ctx.fillRect(0,0,W,H);
-let y=RPT.drawHeader(ctx,W,title,'итоговый рейтинг');
-ctx.font='12px Arial';ctx.fillStyle='#5a7399';ctx.fillText('Сортировка по итоговому рейтингу',24,y+20);y+=36;
-const COLS=[{label:'#',w:50},{label:'Сотрудник',w:350},{label:'ИТОГ',w:100},{label:'Место',w:100},{label:'',w:300}];
+ctx.fillStyle=RPT.BG;ctx.fillRect(0,0,W,H);
+let y=RPT.drawHeader(ctx,W,title,'по итогам месяца');
+ctx.font='12px Arial';ctx.fillStyle=RPT.MUTED;ctx.fillText('Сортировка по итоговому рейтингу · Показатели: Товарка, Аксы, Кредит, Услуги, ВМП, АКС Приоритет',24,y+20);y+=36;
+const COLS=[{label:'#',w:44},{label:'Сотрудник',w:220},{label:'Товарка',w:80},{label:'Аксы',w:80},{label:'Кредит',w:80},{label:'Услуги',w:80},{label:'ВМП',w:80},{label:'АКС Пр.',w:80},{label:'ИТОГ',w:76},{label:'Место',w:80}];
 RPT.drawTableRow(ctx,W,y,COLS,true);y+=ROW_H;
-const sorted=[...staffList].sort((a,b)=>a.rank-b.rank);
-sorted.forEach((p,i)=>{const rankColors=['#ffc847','#c0c0c0','#cd7f32'];const rColor=i<3?rankColors[i]:'#c8ddf5';const cols=[{value:String(p.rank),bold:true,color:rColor},{value:p.name,align:'left',color:'#eaf2ff',bold:i<3},{value:String(p.itog),bold:true,color:'#00d4ff'},{value:'#'+p.rank,color:rColor},{value:'',w:300}].map((col,ci)=>({...col,w:COLS[ci].w}));y=RPT.drawTableRow(ctx,W,y,cols,false);});
-y+=14;ctx.font='11px Arial';ctx.fillStyle='#5a7399';ctx.fillText('Сформировано: '+new Date().toLocaleString('ru-RU')+' · МАКСИМУС',24,y+16);
+data.forEach((p,i)=>{const rankColors=['#ffc847','#c0c0c0','#cd7f32'];const rColor=i<3?rankColors[i]:RPT.TEXT;const mainPct=Math.round((p.coeffs[0]||0)*100);const cols=[{value:String(p.rank),bold:true,color:rColor},{value:p.name,align:'left',bold:i<3,color:i<3?RPT.WHITE:RPT.TEXT},...p.coeffs.slice(0,6).map(c=>{const pc=Math.round(c*100);return{value:pc+'%',color:RPT.pctColor(pc)};}),{value:String(p.itog),bold:true,color:RPT.CYAN},{value:'#'+p.rank,color:rColor}].map((col,ci)=>({...col,w:COLS[ci].w}));y=RPT.drawTableRow(ctx,W,y,cols,false,mainPct);});
+y+=10;ctx.font='11px Arial';ctx.fillStyle=RPT.MUTED;ctx.fillText('Сформировано: '+new Date().toLocaleString('ru-RU')+' · МАКСИМУС',24,y+16);
 RPT.download(canvas,'рейтинг_'+title.toLowerCase().replace(/ /g,'_')+'_'+new Date().toLocaleDateString('ru-RU').replace(/\./g,'-'));
 }
 
