@@ -609,7 +609,51 @@ const topShops=[...APP.data.shops].map(s=>({...s,rPct:shopRatingPct(s)})).sort((
 let top3ShopsHtml='<div class="sec-hdr"><div class="sec-title">Топ магазины</div><div class="sec-badge">по рейтингу</div><div class="sec-line"></div></div><div class="top3-groups" style="grid-template-columns:repeat(3,1fr)">';
 topShops.forEach((s,i)=>{const rc=['r1','r2','r3'][i];top3ShopsHtml+='<div class="top3-card" onclick="openShopDetail(\''+s.kod.replace(/'/g,"\\'")+'\');goPage(\'allshops\')"><div class="top3-rank '+rc+'">'+(i+1)+'</div><div style="font-size:28px">🏪</div><div class="top3-info"><div class="top3-name">'+s.kod+'</div><div class="top3-sub">'+s.name.slice(0,35)+'</div><div class="top3-sub" style="margin-top:2px"><span class="'+(s.brand==='Т2'?'tag-t2':'tag-mmb')+'">'+s.brand+'</span></div></div><div class="top3-score" style="color:'+pctColor(s.rPct)+'">'+s.rPct+'%</div></div>';});
 top3ShopsHtml+='</div>';
-_id('page-home').innerHTML=kpis+top3Sec+top3ShopsHtml+'<div class="sec-hdr"><div class="sec-title">Прогноз продаж</div><div class="sec-badge">Т2 vs ММБ</div><div class="sec-line"></div></div><div class="chart-card">'+chartLegend+'<div style="display:flex;gap:8px;padding:0 8px">'+candleGroupsHtml+'</div></div>';
+const t2Rev=t2.reduce((s,sh)=>s+(sh.revenue?.forecast||0),0);
+const mmbRev=mmb.reduce((s,sh)=>s+(sh.revenue?.forecast||0),0);
+const t2Sto=t2.reduce((s,sh)=>s+(sh.sto?.forecast||0),0);
+const mmbSto=mmb.reduce((s,sh)=>s+(sh.sto?.forecast||0),0);
+const t2Aks=t2.reduce((s,sh)=>s+(sh.aks?.forecast||0),0);
+const mmbAks=mmb.reduce((s,sh)=>s+(sh.aks?.forecast||0),0);
+const t2Ins=t2.reduce((s,sh)=>s+(sh.insurance?.forecast||0),0);
+const mmbIns=mmb.reduce((s,sh)=>s+(sh.insurance?.forecast||0),0);
+const t2Set=t2.reduce((s,sh)=>s+(sh.settings?.forecast||0),0);
+const mmbSet=mmb.reduce((s,sh)=>s+(sh.settings?.forecast||0),0);
+const t2Cred=t2.reduce((s,sh)=>s+(sh.credit?.forecast||0),0);
+const mmbCred=mmb.reduce((s,sh)=>s+(sh.credit?.forecast||0),0);
+
+const sharesData=[
+{label:'Аксессуары',plan:28,t2:t2Rev>0?(t2Aks/t2Rev*100):0,mmb:mmbRev>0?(mmbAks/mmbRev*100):0,colT2:'#38ffb0',colMMB:'#6ee7b7'},
+{label:'Страховки',plan:4,t2:t2Sto>0?(t2Ins/t2Sto*100):0,mmb:mmbSto>0?(mmbIns/mmbSto*100):0,colT2:'#ffc847',colMMB:'#fde68a'},
+{label:'Настройки',plan:4,t2:t2Sto>0?(t2Set/t2Sto*100):0,mmb:mmbSto>0?(mmbSet/mmbSto*100):0,colT2:'#a78bfa',colMMB:'#c4b5fd'},
+{label:'Кредит',plan:25,t2:t2Rev>0?(t2Cred/t2Rev*100):0,mmb:mmbRev>0?(mmbCred/mmbRev*100):0,colT2:'#2dd4bf',colMMB:'#99f6e4'}
+];
+
+let sharesHtml='<div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center">';
+sharesData.forEach(g=>{
+const t2Color=g.t2>=g.plan?'var(--accent3)':g.t2>=g.plan*0.8?'var(--gold)':'var(--red)';
+const mmbColor=g.mmb>=g.plan?'var(--accent3)':g.mmb>=g.plan*0.8?'var(--gold)':'var(--red)';
+sharesHtml+='<div style="flex:1;min-width:200px;max-width:250px;display:flex;flex-direction:column;gap:6px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;padding:12px;">';
+sharesHtml+='<div style="font-size:11px;font-weight:800;color:var(--white);text-align:center;text-transform:uppercase;letter-spacing:.8px">'+g.label+'</div>';
+sharesHtml+='<div style="font-size:10px;color:var(--muted);text-align:center;margin-bottom:4px">План: '+g.plan+'%</div>';
+sharesHtml+='<div style="display:flex;gap:8px;">';
+sharesHtml+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">';
+sharesHtml+='<div style="font-size:11px;font-weight:900;color:'+t2Color+'">'+g.t2.toFixed(1)+'%</div>';
+sharesHtml+='<div style="width:100%;height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;"><div style="height:100%;width:'+Math.min(g.t2/g.plan*100,100)+'%;background:'+g.colT2+';"></div></div>';
+sharesHtml+='<div style="font-size:9px;color:var(--muted);font-weight:700">Т2</div>';
+sharesHtml+='</div>';
+sharesHtml+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">';
+sharesHtml+='<div style="font-size:11px;font-weight:900;color:'+mmbColor+'">'+g.mmb.toFixed(1)+'%</div>';
+sharesHtml+='<div style="width:100%;height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;"><div style="height:100%;width:'+Math.min(g.mmb/g.plan*100,100)+'%;background:'+g.colMMB+';"></div></div>';
+sharesHtml+='<div style="font-size:9px;color:var(--muted);font-weight:700">ММБ</div>';
+sharesHtml+='</div>';
+sharesHtml+='</div></div>';
+});
+sharesHtml+='</div>';
+
+const sharesChartLegend='<div style="display:flex;gap:20px;justify-content:center;margin-bottom:14px"><div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)"><div style="width:24px;height:8px;border-radius:2px;background:rgba(255,255,255,0.2)"></div>План</div><div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)"><div style="width:24px;height:8px;border-radius:2px;background:var(--accent)"></div>Факт</div></div>';
+
+_id('page-home').innerHTML=kpis+top3Sec+top3ShopsHtml+'<div class="sec-hdr"><div class="sec-title">Прогноз продаж</div><div class="sec-badge">Т2 vs ММБ</div><div class="sec-line"></div></div><div class="chart-card">'+chartLegend+'<div style="display:flex;gap:8px;padding:0 8px">'+candleGroupsHtml+'</div></div><div class="sec-hdr" style="margin-top:32px"><div class="sec-title">Доли показателей</div><div class="sec-badge">план vs факт · Т2 vs ММБ</div><div class="sec-line"></div></div><div class="chart-card">'+sharesChartLegend+sharesHtml+'</div>';
 }
 window.setHomeFilter=function(f){homeNetFilter=f;renderHome();};
 // ОТЧЕТ "Выполнение сети"
