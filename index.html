@@ -953,7 +953,7 @@ return list;
 function thCls(key){return key===sortKey?(sortDir===1?'asc':'desc'):'';}
 function buildThead(){
 const metricThs=METRICS.map((m,i)=>'<th class="rth-sortable '+thCls('m'+i)+'" onclick="__rSort_'+pageId+'(\'m'+i+'\')">'+m+'</th>').join('');
-const brandCol=pageId==='curators'?'<th>БРЕНД</th>':'';
+const brandCol='';
 const extraCols=isRatingPage?'<th>СТО</th><th>НАСТРОЙКИ</th><th>СТРАХОВКИ</th>':'';
 return'<thead><tr><th class="rth-sortable '+thCls('rank')+'" onclick="__rSort_'+pageId+'(\'rank\')">#</th><th class="rth-sortable '+thCls('name')+'" onclick="__rSort_'+pageId+'(\'name\')">СОТРУДНИК</th>'+brandCol+metricThs+extraCols+'<th class="rth-sortable '+thCls('itog')+'" onclick="__rSort_'+pageId+'(\'itog\')">ИТОГ</th><th></th></tr></thead>';
 }
@@ -967,7 +967,7 @@ const myShops=APP.data.shops.filter(s=>s[k]===p.name);
 const aggPct=(key)=>{const plan=myShops.reduce((s,sh)=>s+(sh[key]?.plan||0),0);const fc=myShops.reduce((s,sh)=>s+(sh[key]?.forecast||0),0);return plan>0?Math.round(fc/plan*100):0;};
 extraCells='<td><div style="display:flex;flex-direction:column;gap:2px;align-items:center">'+pctBadge(aggPct('sto'),11)+'<div style="height:6px;background:rgba(255,255,255,0.07);border-radius:4px;overflow:hidden;width:60px"><div style="height:100%;width:'+Math.min(aggPct('sto'),100)+'%;background:'+pctColor(aggPct('sto'))+';border-radius:3px"></div></div></div></td><td><div style="display:flex;flex-direction:column;gap:2px;align-items:center">'+pctBadge(aggPct('settings'),11)+'<div style="height:6px;background:rgba(255,255,255,0.07);border-radius:4px;overflow:hidden;width:60px"><div style="height:100%;width:'+Math.min(aggPct('settings'),100)+'%;background:'+pctColor(aggPct('settings'))+';border-radius:3px"></div></div></div></td><td><div style="display:flex;flex-direction:column;gap:2px;align-items:center">'+pctBadge(aggPct('insurance'),11)+'<div style="height:6px;background:rgba(255,255,255,0.07);border-radius:4px;overflow:hidden;width:60px"><div style="height:100%;width:'+Math.min(aggPct('insurance'),100)+'%;background:'+pctColor(aggPct('insurance'))+';border-radius:3px"></div></div></div></td>';
 }
-const brandCell=pageId==='curators'?'<td><span class="'+(getCuratorBrand(p.name)==='Т2'?'tag-t2':'tag-mmb')+'">'+getCuratorBrand(p.name)+'</span></td>':'';
+const brandCell='';
 return'<tr><td class="rank-col"><span class="'+rc+'">'+p.rank+'</span></td><td><div class="name-cell">'+avatarHtml(p.name,34)+'<div><div style="font-weight:700;color:var(--white);white-space:nowrap">'+p.name+'</div>'+(contact?'<div style="font-size:10px;color:var(--muted)">'+contact+'</div>':'')+'</div></div></td>'+brandCell+metricCells+extraCells+'<td style="white-space:nowrap"><span style="font-family:\'Unbounded\',sans-serif;font-size:15px;color:var(--accent2);font-weight:700">'+p.itog+'</span></td><td><span class="row-btn" onclick="event.stopPropagation();openPersonDetail(\''+pageId+'\',\''+p.name.replace(/'/g,"\\'")+'\')">📊</span></td></tr>';
 }).join('');
 }
