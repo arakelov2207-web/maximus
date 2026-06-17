@@ -698,7 +698,7 @@ const COLS=[
 {label:'План итого',w:140},
 {label:'Факт итого',w:140},
 {label:'Прогноз итого',w:140},
-{label:'% прогноза',w:120},
+{label:'% прогноза',w:150},
 {label:'План Т2',w:130},
 {label:'Факт Т2',w:130},
 {label:'Прогноз Т2',w:130},
@@ -1669,7 +1669,26 @@ const title=(isTop?'ТОП 20':'АНТИТОП 20')+' · '+metric.label+(brand!=
 let y=RPT.drawHeader(ctx,W,title,'сортировка по % прогноза '+(isTop?'↓':'↑'));
 ctx.font='12px Arial';ctx.fillStyle='#5a7399';ctx.fillText('Магазины'+(brand!=='Все'?' бренда '+brand:'')+' · Прогноз / План / Факт',24,y+20);y+=36;
 RPT.drawTableRow(ctx,W,y,COLS,true);y+=ROW_H;
-top20.forEach((s,i)=>{const rankColors=['#ffc847','#c0c0c0','#cd7f32'];const rColor=i<3?rankColors[i]:'#c8ddf5';const pctColor=s.metricPct>=100?'#38ffb0':s.metricPct>=80?'#ffc847':'#ff4d6d';const m=s[metric.key]||{plan:0,fact:0,forecast:0};const cols=[{value:String(i+1),bold:true,color:rColor},{value:s.kod,align:'left',bold:true,color:'#eaf2ff'},{value:s.name.length>50?s.name.slice(0,50)+'...':s.name,align:'left',color:RPT.WHITE,bold:true},{value:s.curator.split(' ').slice(0,2).join(' '),bold:true,color:RPT.WHITE},{value:RPT.fmt(m.plan),bold:true,color:RPT.WHITE},{value:RPT.fmt(m.fact),bold:true,color:RPT.WHITE},{value:RPT.fmt(m.forecast),bold:true,color:'#eaf2ff'},{value:s.metricPct+'%',bold:true,color:pctColor},{value:'',w:100}].map((col,ci)=>({...col,w:COLS[ci].w}));y=RPT.drawTableRow(ctx,W,y,cols,false,s.metricPct);RPT.drawBar(ctx,50+90+340+200,y-10,120+120+140+140,s.metricPct,10);});
+top20.forEach((s,i)=>{const rankColors=['#ffc847','#c0c0c0','#cd7f32'];const rColor=i<3?rankColors[i]:'#c8ddf5';const pctColor=s.metricPct>=100?'#38ffb0':s.metricPct>=80?'#ffc847':'#ff4d6d';const m=s[metric.key]||{plan:0,fact:0,forecast:0};const cols=[{value:String(i+1),bold:true,color:rColor},{value:s.kod,align:'left',bold:true,color:'#eaf2ff'},{value:s.name.length>50?s.name.slice(0,50)+'...':s.name,align:'left',color:RPT.WHITE,bold:true},{value:s.curator.split(' ').slice(0,2).join(' '),bold:true,color:RPT.WHITE},{value:RPT.fmt(m.plan),bold:true,color:RPT.WHITE},{value:RPT.fmt(m.fact),bold:true,color:RPT.WHITE},{value:RPT.fmt(m.forecast),bold:true,color:'#eaf2ff'},{value:s.metricPct+'%',bold:true,color:pctColor},{value:'',w:100}].map((col,ci)=>({...col,w:COLS[ci].w}));y=RPT.drawTableRow(ctx,W,y,cols,false,s.metricPct);const barX =
+    COLS[0].w +
+    COLS[1].w +
+    COLS[2].w +
+    COLS[3].w;
+
+const barW =
+    COLS[4].w +
+    COLS[5].w +
+    COLS[6].w +
+    COLS[7].w;
+
+RPT.drawBar(
+    ctx,
+    barX,
+    y-10,
+    barW,
+    s.metricPct,
+    10
+);});
 y+=14;ctx.font='11px Arial';ctx.fillStyle='#5a7399';ctx.fillText('Сформировано: '+new Date().toLocaleString('ru-RU')+' · МАКСИМУС',24,y+16);
 RPT.download(canvas,metric.label.replace(/ /g,'_')+'_'+(brand==='Все'?'all':brand.replace(/ /g,''))+'_'+(isTop?'top20':'bot20')+'_'+new Date().toLocaleDateString('ru-RU').replace(/\./g,'-'));
 }
