@@ -1256,7 +1256,10 @@ download(canvas,filename){console.log('RPT.download:',filename,canvas.width,'x',
 function genReport(type,metric){try{if(type==='curators'){if(metric==='rating')genCuratorRatingReport();else genCuratorMetricReport(metric);}else if(type==='person'){genPersonReport(metric,'full');}}catch(e){alert('Ошибка: '+e.message);}}
 
 function genCuratorRatingReport(){
-const data=[...APP.data.ratings.curators].sort((a,b)=>a.rank-b.rank);
+    alert('GEN CURATOR REPORT TEST');
+
+    const data=[...APP.data.ratings.curators]
+    ....sort((a,b)=>a.rank-b.rank);
 const ROW_H=44;
 // Авто-расчет ширины столбца 'Куратор' на основе самого длинного имени
 const tempCanvas=document.createElement('canvas');const tempCtx=tempCanvas.getContext('2d');
