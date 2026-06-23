@@ -1264,7 +1264,7 @@ tempCtx.font='bold 15px Arial';
 const maxNameWidth=Math.max(...data.map(p=>tempCtx.measureText(p.name).width))+40;
 const COLS=[{label:'#',w:44},{label:'Куратор',w:Math.min(420,Math.max(220,maxNameWidth))},{label:'Товарка',w:80},{label:'Аксы',w:80},{label:'Кредит',w:80},{label:'Услуги',w:80},{label:'ВМП',w:80},{label:'АКС Пр.',w:80},{label:'ИТОГ',w:76},{label:'Место',w:80}];
 const W=COLS.reduce((sum,col)=>sum+col.w,0);
-const H=96+40+ROW_H*(data.length+1)+40;
+const H=4000;
 const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;const ctx=canvas.getContext('2d');
 ctx.fillStyle=RPT.BG;ctx.fillRect(0,0,W,H);
 let y=RPT.drawHeader(ctx,W,'Рейтинг кураторов','по итогам месяца');
