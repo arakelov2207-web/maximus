@@ -530,6 +530,17 @@ _id('page-'+pageId).classList.add('active');
 closeSidebar();window.scrollTo(0,0);
 }
 function goPage(id){navTo(id);}
+// Переключить активную вкладку без перерисовки содержимого (для перехода в детальный просмотр)
+function switchTabOnly(pageId){
+APP.previousPage=pageId;
+document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+const dt=document.querySelector('.nav-tab[data-page="'+pageId+'"]');if(dt)dt.classList.add('active');
+document.querySelectorAll('.sidebar-tab').forEach(t=>t.classList.remove('active'));
+const st=document.querySelector('.sidebar-tab[data-page="'+pageId+'"]');if(st)st.classList.add('active');
+document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+_id('page-'+pageId).classList.add('active');
+closeSidebar();window.scrollTo(0,0);
+}
 function updateLastUploadInfo(){
 const ts=localStorage.getItem('mx_last_upload_ts');
 if(!ts){const msg='Файл не загружен';const el=_id('last-upload-info');if(el)el.textContent=msg;const sel=_id('sidebar-upload-info');if(sel)sel.textContent=msg;return;}
@@ -601,7 +612,7 @@ kpis+='</div>';
 function top3Group(title,arr,pageId){
 if(!arr?.length)return'<div class="top3-group"><div class="top3-group-title">'+title+'</div><div style="color:var(--muted);font-size:12px;padding:10px 0">Нет данных</div></div>';
 const top=arr.slice(0,3);let cards='';
-top.forEach((p,i)=>{const rc=rankCls(i+1);cards+='<div class="top3-card" onclick="openPersonDetail(\''+pageId+'\',\''+p.name.replace(/'/g,"\\'")+'\');goPage(\''+pageId+'\')"><div class="top3-rank '+rc+'">'+(i+1)+'</div>'+avatarHtml(p.name,40)+'<div class="top3-info"><div class="top3-name">'+p.name+'</div><div class="top3-sub">'+(getContact(p.name)||'итог: '+p.itog)+'</div></div><div class="top3-score">'+p.itog+'</div></div>';});
+top.forEach((p,i)=>{const rc=rankCls(i+1);cards+='<div class="top3-card" onclick="openPersonDetail(\''+pageId+'\',\''+p.name.replace(/'/g,"\\'")+'\');switchTabOnly(\''+pageId+'\')"><div class="top3-rank '+rc+'">'+(i+1)+'</div>'+avatarHtml(p.name,40)+'<div class="top3-info"><div class="top3-name">'+p.name+'</div><div class="top3-sub">'+(getContact(p.name)||'итог: '+p.itog)+'</div></div><div class="top3-score">'+p.itog+'</div></div>';});
 return'<div class="top3-group"><div class="top3-group-title">'+title+'</div>'+cards+'</div>';
 }
 const top3Sec='<div class="sec-hdr"><div class="sec-title">Топ рейтинги</div><div class="sec-badge">по месяцу</div><div class="sec-line"></div></div><div class="top3-groups">'+top3Group('Кураторы',APP.data.ratings.curators,'curators')+top3Group('Топ Команда',APP.data.ratings.topk,'topk')+top3Group('Замы РОП',APP.data.ratings.zam,'zam')+'</div>';
@@ -616,7 +627,7 @@ chartGroups.forEach((g,i)=>{if(i>0)candleGroupsHtml+='<div style="width:1px;back
 const chartLegend='<div style="display:flex;gap:20px;justify-content:center;margin-bottom:14px"><div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)"><div style="width:24px;height:8px;border-radius:2px;background:rgba(255,255,255,0.2)"></div>План</div><div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)"><div style="width:24px;height:8px;border-radius:2px;background:var(--accent)"></div>Прогноз</div></div>';
 const topShops=[...APP.data.shops].map(s=>({...s,rPct:shopRatingPct(s)})).sort((a,b)=>b.rPct-a.rPct).slice(0,3);
 let top3ShopsHtml='<div class="sec-hdr"><div class="sec-title">Топ магазины</div><div class="sec-badge">по рейтингу</div><div class="sec-line"></div></div><div class="top3-groups" style="grid-template-columns:repeat(3,1fr)">';
-topShops.forEach((s,i)=>{const rc=['r1','r2','r3'][i];top3ShopsHtml+='<div class="top3-card" onclick="openShopDetail(\''+s.kod.replace(/'/g,"\\'")+'\');goPage(\'allshops\')"><div class="top3-rank '+rc+'">'+(i+1)+'</div><div style="font-size:28px">🏪</div><div class="top3-info"><div class="top3-name">'+s.kod+'</div><div class="top3-sub">'+s.name.slice(0,35)+'</div><div class="top3-sub" style="margin-top:2px"><span class="'+(s.brand==='Т2'?'tag-t2':'tag-mmb')+'">'+s.brand+'</span></div></div><div class="top3-score" style="color:'+pctColor(s.rPct)+'">'+s.rPct+'%</div></div>';});
+topShops.forEach((s,i)=>{const rc=['r1','r2','r3'][i];top3ShopsHtml+='<div class="top3-card" onclick="openShopDetail(\''+s.kod.replace(/'/g,"\\'")+'\');switchTabOnly(\'allshops\')"><div class="top3-rank '+rc+'">'+(i+1)+'</div><div style="font-size:28px">🏪</div><div class="top3-info"><div class="top3-name">'+s.kod+'</div><div class="top3-sub">'+s.name.slice(0,35)+'</div><div class="top3-sub" style="margin-top:2px"><span class="'+(s.brand==='Т2'?'tag-t2':'tag-mmb')+'">'+s.brand+'</span></div></div><div class="top3-score" style="color:'+pctColor(s.rPct)+'">'+s.rPct+'%</div></div>';});
 top3ShopsHtml+='</div>';
 const t2Rev=t2.reduce((s,sh)=>s+(sh.revenue?.forecast||0),0);
 const mmbRev=mmb.reduce((s,sh)=>s+(sh.revenue?.forecast||0),0);
@@ -1068,7 +1079,7 @@ const myShops=D.shops.filter(s=>(p.role==='curator'&&s.curator===p.name)||(p.rol
 const revForecast=myShops.reduce((s,sh)=>s+(sh.revenue?.forecast||0),0);
 const revPlan=myShops.reduce((s,sh)=>s+(sh.revenue?.plan||0),0);
 const revPct=revPlan>0?Math.round(revForecast/revPlan*100):0;
-return'<div class="profile-card" data-role="'+p.role+'"><div class="profile-avatar">'+(pr.photo?'<img src="'+pr.photo+'">':'<span>'+initials(p.name)+'</span>')+'<div class="profile-edit-ico" onclick="event.stopPropagation();openPM(\''+p.name.replace(/'/g,"\\'")+'\')">✎</div></div><div class="profile-name">'+p.name+'</div><div class="profile-role role-'+p.role+'">'+p.roleLabel+' · #'+p.rank+'</div>'+(pr.birthday?'<div class="profile-contact">🎂 '+formatBirthday(pr.birthday)+'</div>':'')+(pr.phone?'<div class="profile-contact">📞 '+pr.phone+'</div>':'')+(pr.tg?'<div class="profile-contact">✈ '+pr.tg+'</div>':'')+'<div class="profile-stats"><div class="pstat"><div class="pstat-val">'+myShops.length+'</div><div class="pstat-lbl">Магазинов</div></div><div class="pstat"><div class="pstat-val" style="color:'+pctColor(revPct)+'">'+revPct+'%</div><div class="pstat-lbl">Выручка</div></div><div class="pstat"><div class="pstat-val">'+p.itog+'</div><div class="pstat-lbl">ИТОГ</div></div><div class="pstat"><div class="pstat-val">'+p.rank+'</div><div class="pstat-lbl">Место</div></div></div><button class="profile-btn" onclick="openPersonDetail(\''+(p.role==='curator'?'curators':p.role==='topk'?'topk':'zam')+'\',\''+p.name.replace(/'/g,"\\'")+'\');goPage(\''+(p.role==='curator'?'curators':p.role==='topk'?'topk':'zam')+'\')">📊 Показатели и магазины →</button></div>';
+return'<div class="profile-card" data-role="'+p.role+'"><div class="profile-avatar">'+(pr.photo?'<img src="'+pr.photo+'">':'<span>'+initials(p.name)+'</span>')+'<div class="profile-edit-ico" onclick="event.stopPropagation();openPM(\''+p.name.replace(/'/g,"\\'")+'\')">✎</div></div><div class="profile-name">'+p.name+'</div><div class="profile-role role-'+p.role+'">'+p.roleLabel+' · #'+p.rank+'</div>'+(pr.birthday?'<div class="profile-contact">🎂 '+formatBirthday(pr.birthday)+'</div>':'')+(pr.phone?'<div class="profile-contact">📞 '+pr.phone+'</div>':'')+(pr.tg?'<div class="profile-contact">✈ '+pr.tg+'</div>':'')+'<div class="profile-stats"><div class="pstat"><div class="pstat-val">'+myShops.length+'</div><div class="pstat-lbl">Магазинов</div></div><div class="pstat"><div class="pstat-val" style="color:'+pctColor(revPct)+'">'+revPct+'%</div><div class="pstat-lbl">Выручка</div></div><div class="pstat"><div class="pstat-val">'+p.itog+'</div><div class="pstat-lbl">ИТОГ</div></div><div class="pstat"><div class="pstat-val">'+p.rank+'</div><div class="pstat-lbl">Место</div></div></div><button class="profile-btn" onclick="openPersonDetail(\''+(p.role==='curator'?'curators':p.role==='topk'?'topk':'zam')+'\',\''+p.name.replace(/'/g,"\\'")+'\');switchTabOnly(\''+(p.role==='curator'?'curators':p.role==='topk'?'topk':'zam')+'\')">📊 Показатели и магазины →</button></div>';
 }).join('')+'</div>';
 }
 html+='<div id="profiles-list">'+buildCards(uniq)+'</div>';
