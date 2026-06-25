@@ -1704,12 +1704,15 @@ if(pageId==='t2'){brand='Т2';shops=APP.data.shops.filter(s=>s.brand==='Т2');}
 else if(pageId==='mmb'){brand='ММБ';shops=APP.data.shops.filter(s=>s.brand==='ММБ');}
 else if(pageId==='allshops'){shops=[...APP.data.shops];}
 else{alert('Неизвестная страница: '+pageId);return;}
-shops=shops.map(s=>({...s,metricPct:metricKey==='rating'?shopRatingPct(s):metricKey==='vmp'?Math.round((s.vmp||0)*100):(s[metric.key]?.plan>0?Math.round(s[metric.key].forecast/s[metric.key].plan*100):0)}));
+const isRating=metricKey==='rating';
+// Д16-новый: для рейтинга считаем 4 входящих показателя
+const RATING_KEYS=['sto','aks','credit','services'];
+function ratingSubPct(s,k){return s[k]?.plan>0?Math.round(s[k].forecast/s[k].plan*100):0;}
+shops=shops.map(s=>({...s,metricPct:isRating?shopRatingPct(s):metricKey==='vmp'?Math.round((s.vmp||0)*100):(s[metric.key]?.plan>0?Math.round(s[metric.key].forecast/s[metric.key].plan*100):0)}));
 const isTop=type==='top';
 shops.sort((a,b)=>isTop?b.metricPct-a.metricPct:a.metricPct-b.metricPct);
 const top20=shops.slice(0,20);
 const ROW_H=48;
-// Авто-расчет ширины столбцов 'Код', 'Магазин', 'Куратор'
 const tempCanvas=document.createElement('canvas');const tempCtx=tempCanvas.getContext('2d');
 tempCtx.font='bold 12px Arial';
 const maxKodWidth=Math.max(...top20.map(s=>tempCtx.measureText(s.kod).width))+20;
@@ -1717,35 +1720,45 @@ tempCtx.font='bold 15px Arial';
 const maxNameWidth=Math.max(...top20.map(s=>tempCtx.measureText(s.name).width))+20;
 tempCtx.font='bold 12px Arial';
 const maxCuratorWidth=Math.max(...top20.map(s=>tempCtx.measureText(s.curator).width))+20;
-const COLS=[{label:'#',w:50},{label:'Код',w:Math.max(90,maxKodWidth)},{label:'Магазин',w:Math.max(340,maxNameWidth)},{label:'Куратор',w:Math.max(200,maxCuratorWidth)},{label:'План',w:120},{label:'Факт',w:140},{label:'Прогноз',w:120},{label:'% прогноза',w:120},{label:'',w:100}];
+let COLS;
+if(isRating){
+COLS=[{label:'#',w:46},{label:'Код',w:Math.max(80,maxKodWidth)},{label:'Магазин',w:Math.max(280,maxNameWidth)},{label:'Куратор',w:Math.max(170,maxCuratorWidth)},
+{label:'СТО %',w:90},{label:'Аксы %',w:90},{label:'Кредит %',w:90},{label:'Услуги %',w:90},{label:'Среднее %',w:110},{label:'',w:40}];
+}else{
+COLS=[{label:'#',w:50},{label:'Код',w:Math.max(90,maxKodWidth)},{label:'Магазин',w:Math.max(340,maxNameWidth)},{label:'Куратор',w:Math.max(200,maxCuratorWidth)},{label:'План',w:120},{label:'Факт',w:140},{label:'Прогноз',w:120},{label:'% прогноза',w:120},{label:'',w:100}];
+}
 const W=COLS.reduce((sum,col)=>sum+col.w,0);
 const H=120+40+ROW_H*(top20.length+1)+60;
 const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;const ctx=canvas.getContext('2d');
 ctx.fillStyle='#060c1a';ctx.fillRect(0,0,W,H);
 const title=(isTop?'ТОП 20':'АНТИТОП 20')+' · '+metric.label+(brand!=='Все'?' · '+brand:'');
-let y=RPT.drawHeader(ctx,W,title,'сортировка по % прогноза '+(isTop?'↓':'↑'));
-ctx.font='12px Arial';ctx.fillStyle='#5a7399';ctx.fillText('Магазины'+(brand!=='Все'?' бренда '+brand:'')+' · Прогноз / План / Факт',24,y+20);y+=36;
+let y=RPT.drawHeader(ctx,W,title,isRating?'СТО+Аксы+Кредит+Услуги · сортировка '+(isTop?'↓':'↑'):'сортировка по % прогноза '+(isTop?'↓':'↑'));
+ctx.font='12px Arial';ctx.fillStyle='#5a7399';
+ctx.fillText('Магазины'+(brand!=='Все'?' бренда '+brand:'')+(isRating?' · % прогноза по каждому показателю рейтинга':' · Прогноз / План / Факт'),24,y+20);y+=36;
 RPT.drawTableRow(ctx,W,y,COLS,true);y+=ROW_H;
-top20.forEach((s,i)=>{const rankColors=['#ffc847','#c0c0c0','#cd7f32'];const rColor=i<3?rankColors[i]:'#c8ddf5';const pctColor=s.metricPct>=100?'#38ffb0':s.metricPct>=80?'#ffc847':'#ff4d6d';const m=s[metric.key]||{plan:0,fact:0,forecast:0};const cols=[{value:String(i+1),bold:true,color:rColor},{value:s.kod,align:'left',bold:true,color:'#eaf2ff'},{value:s.name.length>50?s.name.slice(0,50)+'...':s.name,align:'left',color:RPT.WHITE,bold:true},{value:s.curator.split(' ').slice(0,2).join(' '),bold:true,color:RPT.WHITE},{value:RPT.fmt(m.plan),bold:true,color:RPT.WHITE},{value:RPT.fmt(m.fact),bold:true,color:RPT.WHITE},{value:RPT.fmt(m.forecast),bold:true,color:'#eaf2ff'},{value:s.metricPct+'%',bold:true,color:pctColor},{value:'',w:100}].map((col,ci)=>({...col,w:COLS[ci].w}));y=RPT.drawTableRow(ctx,W,y,cols,false,s.metricPct);const barX =
-    COLS[0].w +
-    COLS[1].w +
-    COLS[2].w +
-    COLS[3].w;
-
-const barW =
-    COLS[4].w +
-    COLS[5].w +
-    COLS[6].w +
-    COLS[7].w;
-
-RPT.drawBar(
-    ctx,
-    barX,
-    y-10,
-    barW,
-    s.metricPct,
-    10
-);});
+top20.forEach((s,i)=>{
+const rankColors=['#ffc847','#c0c0c0','#cd7f32'];const rColor=i<3?rankColors[i]:'#c8ddf5';
+const pctColor=s.metricPct>=100?'#38ffb0':s.metricPct>=80?'#ffc847':'#ff4d6d';
+let cols;
+if(isRating){
+const stoP=ratingSubPct(s,'sto'),aksP=ratingSubPct(s,'aks'),credP=ratingSubPct(s,'credit'),servP=ratingSubPct(s,'services');
+const cFor=(p)=>p>=100?'#38ffb0':p>=80?'#ffc847':'#ff4d6d';
+cols=[{value:String(i+1),bold:true,color:rColor},{value:s.kod,align:'left',bold:true,color:'#eaf2ff'},
+{value:s.name.length>40?s.name.slice(0,40)+'...':s.name,align:'left',color:RPT.WHITE,bold:true},
+{value:s.curator.split(' ').slice(0,2).join(' '),bold:true,color:RPT.WHITE},
+{value:stoP+'%',bold:true,color:cFor(stoP)},{value:aksP+'%',bold:true,color:cFor(aksP)},
+{value:credP+'%',bold:true,color:cFor(credP)},{value:servP+'%',bold:true,color:cFor(servP)},
+{value:s.metricPct+'%',bold:true,color:pctColor},{value:'',w:40}
+].map((col,ci)=>({...col,w:COLS[ci].w}));
+}else{
+const m=s[metric.key]||{plan:0,fact:0,forecast:0};
+cols=[{value:String(i+1),bold:true,color:rColor},{value:s.kod,align:'left',bold:true,color:'#eaf2ff'},{value:s.name.length>50?s.name.slice(0,50)+'...':s.name,align:'left',color:RPT.WHITE,bold:true},{value:s.curator.split(' ').slice(0,2).join(' '),bold:true,color:RPT.WHITE},{value:RPT.fmt(m.plan),bold:true,color:RPT.WHITE},{value:RPT.fmt(m.fact),bold:true,color:RPT.WHITE},{value:RPT.fmt(m.forecast),bold:true,color:'#eaf2ff'},{value:s.metricPct+'%',bold:true,color:pctColor},{value:'',w:100}].map((col,ci)=>({...col,w:COLS[ci].w}));
+}
+y=RPT.drawTableRow(ctx,W,y,cols,false,s.metricPct);
+const barX=isRating?(COLS[0].w+COLS[1].w+COLS[2].w+COLS[3].w):(COLS[0].w+COLS[1].w+COLS[2].w+COLS[3].w);
+const barW=isRating?(COLS[4].w+COLS[5].w+COLS[6].w+COLS[7].w+COLS[8].w):(COLS[4].w+COLS[5].w+COLS[6].w+COLS[7].w);
+RPT.drawBar(ctx,barX,y-10,barW,s.metricPct,10);
+});
 y+=14;ctx.font='11px Arial';ctx.fillStyle='#5a7399';ctx.fillText('Сформировано: '+new Date().toLocaleString('ru-RU')+' · МАКСИМУС',24,y+16);
 RPT.download(canvas,metric.label.replace(/ /g,'_')+'_'+(brand==='Все'?'all':brand.replace(/ /g,''))+'_'+(isTop?'top20':'bot20')+'_'+new Date().toLocaleDateString('ru-RU').replace(/\./g,'-'));
 }
