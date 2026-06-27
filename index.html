@@ -1245,17 +1245,17 @@ if(isHeader){
 
     let headerText=(col.label||'').toUpperCase();
 
-    ctx.font='bold 10px Arial';
+    ctx.font='bold 13px Arial';
 
     if(ctx.measureText(headerText).width > col.w-12){
-        ctx.font='bold 9px Arial';
+        ctx.font='bold 12px Arial';
     }
 
     if(ctx.measureText(headerText).width > col.w-12){
-        ctx.font='bold 8px Arial';
+        ctx.font='bold 10px Arial';
     }
 
-    ctx.fillStyle='rgba(255,255,255,0.85)';
+    ctx.fillStyle='#ffffff';
     ctx.textAlign='center';
 
     ctx.fillText(
@@ -1315,7 +1315,7 @@ ctx.fillStyle=RPT.BG;ctx.fillRect(0,0,W,H);
 let y=RPT.drawHeader(ctx,W,info.label+' — по кураторам','сортировка по % прогноза ↓');
 ctx.font='12px Arial';ctx.fillStyle=RPT.MUTED;ctx.fillText('Данные из ежедневного файла · % = прогноз / план',24,y+20);y+=36;
 RPT.drawTableRow(ctx,W,y,COLS,true);y+=44;
-rows.forEach((r,i)=>{const cols=[{value:String(i+1),bold:true,color:i<3?['#ffc847','#c0c0c0','#cd7f32'][i]:RPT.MUTED},{value:r.name,align:'left',color:RPT.TEXT},{value:RPT.fmt(r.plan),bold:true,color:RPT.WHITE},{value:RPT.fmt(r.fact),color:RPT.MUTED},{value:RPT.fmt(r.fc),bold:true,color:RPT.WHITE},{value:r.pct+'%',bold:true,color:RPT.pctColor(r.pct)},{value:'',w:56}].map((col,ci)=>({...col,w:COLS[ci].w}));y=RPT.drawTableRow(ctx,W,y,cols,false,r.pct);RPT.drawBar(ctx,44+230+90,y-8,110+110+110,r.pct,8);});
+rows.forEach((r,i)=>{const cols=[{value:String(i+1),bold:true,color:i<3?['#ffc847','#c0c0c0','#cd7f32'][i]:RPT.MUTED},{value:r.name,align:'left',color:RPT.TEXT},{value:RPT.fmt(r.plan),bold:true,color:RPT.WHITE},{value:RPT.fmt(r.fact),color:RPT.WHITE},{value:RPT.fmt(r.fc),bold:true,color:RPT.WHITE},{value:r.pct+'%',bold:true,color:RPT.pctColor(r.pct)},{value:'',w:56}].map((col,ci)=>({...col,w:COLS[ci].w}));y=RPT.drawTableRow(ctx,W,y,cols,false,r.pct);RPT.drawBar(ctx,44+230+90,y-8,110+110+110,r.pct,8);});
 y+=14;ctx.font='11px Arial';ctx.fillStyle=RPT.MUTED;ctx.fillText('Сформировано: '+new Date().toLocaleString('ru-RU')+' · МАКСИМУС',24,y+16);
 RPT.download(canvas,info.label.replace(/ /g,'_')+'_кураторы_'+new Date().toLocaleDateString('ru-RU').replace(/\./g,'-'));
 }
@@ -1341,7 +1341,7 @@ ctx.fillStyle=RPT.BG;ctx.fillRect(0,0,W,H);
 let y=RPT.drawHeader(ctx,W,info.label+' · '+curatorName.split(' ')[0],myShops.length+' магазинов · сортировка ↓');
 ctx.font='12px Arial';ctx.fillStyle=RPT.MUTED;ctx.fillText('Сортировка по % прогноза (убывание)',24,y+20);y+=36;
 RPT.drawTableRow(ctx,W,y,COLS,true);y+=ROW_H;
-rows.forEach((r,i)=>{const cols=[{value:String(i+1),color:i<3?['#ffc847','#c0c0c0','#cd7f32'][i]:RPT.MUTED},{value:r.kod,align:'left',bold:true,color:RPT.WHITE},{value:r.name.slice(0,28),align:'left',color:RPT.TEXT},{value:RPT.fmt(r.m.plan),bold:true,color:RPT.WHITE},{value:RPT.fmt(r.m.fact),color:RPT.MUTED},{value:RPT.fmt(r.m.forecast),bold:true,color:RPT.WHITE},{value:r.pct+'%',bold:true,color:RPT.pctColor(r.pct)},{value:r.fPct+'%',color:RPT.pctColor(r.fPct)}].map((col,ci)=>({...col,w:COLS[ci].w}));y=RPT.drawTableRow(ctx,W,y,cols,false,r.pct);RPT.drawBar(ctx,40+80+200+80,y-8,110+110+100,r.pct,8);});
+rows.forEach((r,i)=>{const cols=[{value:String(i+1),color:i<3?['#ffc847','#c0c0c0','#cd7f32'][i]:RPT.MUTED},{value:r.kod,align:'left',bold:true,color:RPT.WHITE},{value:r.name.slice(0,28),align:'left',color:RPT.TEXT},{value:RPT.fmt(r.m.plan),bold:true,color:RPT.WHITE},{value:RPT.fmt(r.m.fact),color:RPT.WHITE},{value:RPT.fmt(r.m.forecast),bold:true,color:RPT.WHITE},{value:r.pct+'%',bold:true,color:RPT.pctColor(r.pct)},{value:r.fPct+'%',color:RPT.pctColor(r.fPct)}].map((col,ci)=>({...col,w:COLS[ci].w}));y=RPT.drawTableRow(ctx,W,y,cols,false,r.pct);RPT.drawBar(ctx,40+80+200+80,y-8,110+110+100,r.pct,8);});
 y+=14;ctx.font='11px Arial';ctx.fillStyle=RPT.MUTED;ctx.fillText('Сформировано: '+new Date().toLocaleString('ru-RU')+' · МАКСИМУС',24,y+16);
 RPT.download(canvas,info.label+'_'+curatorName.split(' ')[0]+'_'+new Date().toLocaleDateString('ru-RU').replace(/\./g,'-'));
 }
@@ -1647,7 +1647,7 @@ ctx.fillStyle='#060c1a';ctx.fillRect(0,0,W,H);
 let y=RPT.drawHeader(ctx,W,metric.label+' — '+title,'сортировка по % прогноза ↓');
 ctx.font='12px Arial';ctx.fillStyle='#5a7399';ctx.fillText('Прогноз / План / Факт по каждому сотруднику',24,y+20);y+=36;
 RPT.drawTableRow(ctx,W,y,COLS,true);y+=ROW_H;
-rows.forEach((r,i)=>{const rankColors=['#ffc847','#c0c0c0','#cd7f32'];const rColor=i<3?rankColors[i]:'#c8ddf5';const pctColor=r.pct>=100?'#38ffb0':r.pct>=80?'#ffc847':'#ff4d6d';const cols=[{value:String(r.rank),bold:true,color:rColor},{value:r.name,align:'left',color:'#eaf2ff',bold:i<3},{value:String(r.shops),color:'#5a7399'},{value:RPT.fmt(r.plan),bold:true,color:RPT.WHITE},{value:RPT.fmt(r.fact),color:'#5a7399'},{value:RPT.fmt(r.forecast),bold:true,color:'#eaf2ff'},{value:r.pct+'%',bold:true,color:pctColor},{value:'',w:30}].map((col,ci)=>({...col,w:COLS[ci].w}));y=RPT.drawTableRow(ctx,W,y,cols,false,r.pct);RPT.drawBar(ctx,50+280+90,y-10,110+120+110+110,r.pct,10);});
+rows.forEach((r,i)=>{const rankColors=['#ffc847','#c0c0c0','#cd7f32'];const rColor=i<3?rankColors[i]:'#c8ddf5';const pctColor=r.pct>=100?'#38ffb0':r.pct>=80?'#ffc847':'#ff4d6d';const cols=[{value:String(r.rank),bold:true,color:rColor},{value:r.name,align:'left',color:'#eaf2ff',bold:i<3},{value:String(r.shops),color:'#5a7399'},{value:RPT.fmt(r.plan),bold:true,color:RPT.WHITE},{value:RPT.fmt(r.fact),color:RPT.WHITE},{value:RPT.fmt(r.forecast),bold:true,color:'#eaf2ff'},{value:r.pct+'%',bold:true,color:pctColor},{value:'',w:30}].map((col,ci)=>({...col,w:COLS[ci].w}));y=RPT.drawTableRow(ctx,W,y,cols,false,r.pct);RPT.drawBar(ctx,50+280+90,y-10,110+120+110+110,r.pct,10);});
 y+=14;ctx.font='11px Arial';ctx.fillStyle='#5a7399';ctx.fillText('Сформировано: '+new Date().toLocaleString('ru-RU')+' · МАКСИМУС',24,y+16);
 RPT.download(canvas,metric.label.replace(/ /g,'_')+'_'+groupType+'_'+new Date().toLocaleDateString('ru-RU').replace(/\./g,'-'));
 }
