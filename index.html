@@ -428,6 +428,23 @@ ondrop="handleDrop(event)">
 <div class="upload-err" id="upload-err"></div>
 </div>
 </div>
+<div class="modal-overlay" id="month-picker-modal">
+<div class="modal" style="width:420px">
+<div class="modal-close" onclick="closeMonthPicker()">✕</div>
+<div class="modal-title">📦 Выберите месяц архива</div>
+<div style="font-size:12px;color:var(--muted);margin-bottom:16px">Это итоговый файл — он сохранится в историю для сравнения по месяцам</div>
+<div class="form-group">
+<label class="form-label">Месяц</label>
+<select class="form-input" id="mp-month"></select>
+</div>
+<div class="form-group">
+<label class="form-label">Год</label>
+<select class="form-input" id="mp-year"></select>
+</div>
+<div id="mp-existing-hint" style="font-size:11px;color:var(--accent3);margin-bottom:10px;display:none">✓ Этот месяц уже есть в архиве — повторная загрузка заменит данные</div>
+<button class="form-save" onclick="confirmMonthAndUpload()">Сохранить в архив</button>
+</div>
+</div>
 <div class="modal-overlay" id="profile-modal">
 <div class="modal">
 <div class="modal-close" onclick="closePM()">✕</div>
@@ -498,8 +515,38 @@ return null;
 async saveData(data,uploadedBy){
 try{const r=await fetch(SUPABASE_URL+'/rest/v1/dashboard_data',{method:'POST',headers:{...SB_HEADERS,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({id:'current',data:data,uploaded_at:new Date().toISOString(),uploaded_by:uploadedBy||'user'})});return r.ok;}catch(e){return false;}
 },
-async saveHistory(label,data){try{const r=await fetch(SUPABASE_URL+'/rest/v1/dashboard_history',{method:'POST',headers:SB_HEADERS,body:JSON.stringify({label,data,uploaded_at:new Date().toISOString()})});return r.ok;}catch(e){return false;}},
-async loadHistory(){try{const r=await fetch(SUPABASE_URL+'/rest/v1/dashboard_history?select=id,label,uploaded_at&order=uploaded_at.desc',{headers:SB_HEADERS});if(!r.ok)return[];return await r.json();}catch(e){return[];}},
+async saveHistory(label,data,monthKey){
+try{
+const r=await fetch(SUPABASE_URL+'/rest/v1/dashboard_history',{
+method:'POST',
+headers:{...SB_HEADERS,'Prefer':'resolution=merge-duplicates'},
+body:JSON.stringify({month_key:monthKey,label,data,uploaded_at:new Date().toISOString()})
+});
+return r.ok;
+}catch(e){console.error('saveHistory error:',e);return false;}
+},
+async loadHistory(){
+try{
+const r=await fetch(SUPABASE_URL+'/rest/v1/dashboard_history?select=id,label,month_key,uploaded_at&order=month_key.desc',{headers:SB_HEADERS});
+if(!r.ok)return[];
+return await r.json();
+}catch(e){return[];}
+},
+async loadHistoryData(monthKey){
+try{
+const r=await fetch(SUPABASE_URL+'/rest/v1/dashboard_history?month_key=eq.'+monthKey+'&select=data,label',{headers:SB_HEADERS});
+if(!r.ok)return null;
+const rows=await r.json();
+return rows.length?rows[0]:null;
+}catch(e){return null;}
+},
+async loadAllHistoryData(){
+try{
+const r=await fetch(SUPABASE_URL+'/rest/v1/dashboard_history?select=month_key,label,data&order=month_key.asc',{headers:SB_HEADERS});
+if(!r.ok)return[];
+return await r.json();
+}catch(e){return[];}
+},
 async saveProfile(name,phone,telegram,photoBase64,birthday){
 try{const r=await fetch(SUPABASE_URL+'/rest/v1/staff_profiles',{method:'POST',headers:{...SB_HEADERS,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({name,phone,telegram,photo_url:photoBase64||null,birthday:birthday||null,updated_at:new Date().toISOString()})});return r.ok;}catch(e){return false;}
 },
@@ -673,7 +720,70 @@ sharesHtml+='</div>';
 
 const sharesChartLegend='<div style="display:flex;gap:20px;justify-content:center;margin-bottom:14px"><div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)"><div style="width:24px;height:8px;border-radius:2px;background:rgba(255,255,255,0.2)"></div>План</div><div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)"><div style="width:24px;height:8px;border-radius:2px;background:var(--accent)"></div>Факт</div></div>';
 
-_id('page-home').innerHTML=kpis+top3Sec+top3ShopsHtml+'<div class="sec-hdr"><div class="sec-title">Прогноз продаж</div><div class="sec-badge">Т2 vs ММБ</div><div class="sec-line"></div></div><div class="chart-card">'+chartLegend+'<div style="display:flex;gap:8px;padding:0 8px">'+candleGroupsHtml+'</div></div><div class="sec-hdr" style="margin-top:32px"><div class="sec-title">Доли показателей</div><div class="sec-badge">план vs факт · Т2 vs ММБ</div><div class="sec-line"></div></div><div class="chart-card">'+sharesChartLegend+sharesHtml+'</div>';
+_id('page-home').innerHTML=kpis+top3Sec+top3ShopsHtml+'<div class="sec-hdr"><div class="sec-title">Прогноз продаж</div><div class="sec-badge">Т2 vs ММБ</div><div class="sec-line"></div></div><div class="chart-card">'+chartLegend+'<div style="display:flex;gap:8px;padding:0 8px">'+candleGroupsHtml+'</div></div><div class="sec-hdr" style="margin-top:32px"><div class="sec-title">Доли показателей</div><div class="sec-badge">план vs факт · Т2 vs ММБ</div><div class="sec-line"></div></div><div class="chart-card">'+sharesChartLegend+sharesHtml+'</div><div class="sec-hdr" style="margin-top:32px"><div class="sec-title">Сравнение по месяцам</div><div class="sec-badge">факт · последние 12 мес</div><div class="sec-line"></div></div><div id="monthly-charts-container">'+monthlyChartsPlaceholder()+'</div>';
+renderMonthlyComparisonCharts();
+}
+
+function monthlyChartsPlaceholder(){
+return '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px"><div class="spinner" style="margin:0 auto 12px"></div>Загружаем историю по месяцам...</div>';
+}
+
+// ═══════════════════════════════════════════════
+// ДИАГРАММЫ СРАВНЕНИЯ МЕСЯЦЕВ (Главная — по сети)
+// ═══════════════════════════════════════════════
+async function renderMonthlyComparisonCharts(){
+const container=_id('monthly-charts-container');
+if(!container)return;
+let historyData=APP._cachedHistoryData;
+if(!historyData){
+historyData=await DB.loadAllHistoryData();
+APP._cachedHistoryData=historyData;
+}
+if(!historyData||historyData.length===0){
+container.innerHTML='<div class="empty-state">Нет архивных данных. Загрузите итоговый файл за месяц через кнопку загрузки (тип "Итоговый").</div>';
+return;
+}
+// Берём последние 12 месяцев
+const last12=historyData.slice(-12);
+const METRICS_MONTHLY=[
+{key:'revenue',label:'Выручка',color:'#2d8cff'},
+{key:'sto',label:'СТО',color:'#00d4ff'},
+{key:'aks',label:'Аксессуары',color:'#38ffb0'},
+{key:'insurance',label:'Страховки',color:'#ffc847'},
+{key:'settings',label:'Настройки',color:'#a78bfa'},
+{key:'credit',label:'Кредит',color:'#2dd4bf'},
+{key:'services',label:'Услуги',color:'#a3e635'},
+];
+let html='<div style="display:flex;flex-direction:column;gap:24px">';
+METRICS_MONTHLY.forEach(m=>{
+const values=last12.map(h=>{
+const shops=h.data?.shops||[];
+return shops.reduce((s,sh)=>s+(sh[m.key]?.fact||0),0);
+});
+const maxVal=Math.max(...values,1);
+html+='<div class="chart-card" style="padding:18px 20px">';
+html+='<div style="font-size:12px;font-weight:800;color:var(--white);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px">'+m.label+'</div>';
+html+='<div style="display:flex;gap:6px;align-items:flex-end;height:120px">';
+last12.forEach((h,i)=>{
+const v=values[i];
+const barH=Math.max(Math.round(v/maxVal*100),v>0?4:0);
+html+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end">';
+html+='<div style="font-size:9px;color:var(--muted);writing-mode:vertical-rl;text-orientation:mixed;height:0">'+fmtShort(v)+'</div>';
+html+='<div style="width:100%;height:'+barH+'%;background:'+m.color+';border-radius:4px 4px 0 0;min-height:2px;position:relative" title="'+h.label+': '+fmtShort(v)+'"></div>';
+html+='<div style="font-size:9px;color:var(--muted);white-space:nowrap;transform:rotate(-45deg);transform-origin:center;margin-top:6px">'+(h.label||'').split(' ')[0].slice(0,3)+'</div>';
+html+='</div>';
+});
+html+='</div></div>';
+});
+html+='</div>';
+container.innerHTML=html;
+}
+
+function fmtShort(n){
+if(!n)return'0';
+if(n>=1e6)return(n/1e6).toFixed(1)+'M';
+if(n>=1e3)return(n/1e3).toFixed(0)+'K';
+return String(Math.round(n));
 }
 window.setHomeFilter=function(f){homeNetFilter=f;renderHome();};
 // ОТЧЕТ "Выполнение сети"
@@ -946,7 +1056,66 @@ const tbl=_id('page-'+pageId).querySelector('[id^="shop-tbl"]');
 if(tbl)tbl.innerHTML=shopTableHtml(myShops,_detailSortKey,_detailSortDir,pageId+'_detail');
 else{const container=_id('page-'+pageId);const allTbls=container.querySelectorAll('.rtable-wrap,.empty-state');const last=allTbls[allTbls.length-1];if(last)last.outerHTML=shopTableHtml(myShops,_detailSortKey,_detailSortDir,pageId+'_detail');}
 };
-_id('page-'+pageId).innerHTML=content;
+_id('page-'+pageId).innerHTML=content+'<div class="sec-hdr" style="margin-top:32px"><div class="sec-title">Динамика по месяцам</div><div class="sec-badge">факт · последние 12 мес</div><div class="sec-line"></div></div><div id="person-monthly-chart-'+pageId+'">'+monthlyChartsPlaceholder()+'</div>';
+renderPersonMonthlyChart(pageId,name);
+}
+
+// ═══════════════════════════════════════════════
+// ДИАГРАММА ПО МЕСЯЦАМ ДЛЯ КОНКРЕТНОГО СОТРУДНИКА
+// ═══════════════════════════════════════════════
+async function renderPersonMonthlyChart(pageId,name){
+const containerId='person-monthly-chart-'+pageId;
+const container=_id(containerId);
+if(!container)return;
+let historyData=APP._cachedHistoryData;
+if(!historyData){
+historyData=await DB.loadAllHistoryData();
+APP._cachedHistoryData=historyData;
+}
+if(!historyData||historyData.length===0){
+container.innerHTML='<div class="empty-state">Нет архивных данных за прошлые месяцы</div>';
+return;
+}
+const last12=historyData.slice(-12);
+const keyMap={curators:'curator',topk:'topk',zam:'zam'};
+const staffKey=keyMap[pageId];
+const METRICS_MONTHLY=[
+{key:'revenue',label:'Выручка',color:'#2d8cff'},
+{key:'sto',label:'СТО',color:'#00d4ff'},
+{key:'aks',label:'Аксессуары',color:'#38ffb0'},
+{key:'insurance',label:'Страховки',color:'#ffc847'},
+{key:'settings',label:'Настройки',color:'#a78bfa'},
+{key:'credit',label:'Кредит',color:'#2dd4bf'},
+{key:'services',label:'Услуги',color:'#a3e635'},
+];
+let html='<div style="display:flex;flex-direction:column;gap:24px">';
+let hasAnyData=false;
+METRICS_MONTHLY.forEach(m=>{
+const values=last12.map(h=>{
+const shops=(h.data?.shops||[]).filter(s=>s[staffKey]===name);
+return shops.reduce((s,sh)=>s+(sh[m.key]?.fact||0),0);
+});
+if(values.some(v=>v>0))hasAnyData=true;
+const maxVal=Math.max(...values,1);
+html+='<div class="chart-card" style="padding:18px 20px">';
+html+='<div style="font-size:12px;font-weight:800;color:var(--white);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px">'+m.label+'</div>';
+html+='<div style="display:flex;gap:6px;align-items:flex-end;height:110px">';
+last12.forEach((h,i)=>{
+const v=values[i];
+const barH=Math.max(Math.round(v/maxVal*100),v>0?4:0);
+html+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end">';
+html+='<div style="width:100%;height:'+barH+'%;background:'+m.color+';border-radius:4px 4px 0 0;min-height:2px" title="'+h.label+': '+fmtShort(v)+'"></div>';
+html+='<div style="font-size:9px;color:var(--muted);white-space:nowrap;transform:rotate(-45deg);transform-origin:center;margin-top:6px">'+(h.label||'').split(' ')[0].slice(0,3)+'</div>';
+html+='</div>';
+});
+html+='</div></div>';
+});
+html+='</div>';
+if(!hasAnyData){
+container.innerHTML='<div class="empty-state">Нет данных по этому сотруднику в архивных месяцах (возможно куратор/магазины изменились)</div>';
+}else{
+container.innerHTML=html;
+}
 }
 
 function formatBirthday(bday){
@@ -1131,9 +1300,14 @@ const miss=['Прогноз продаж','Планы сети','Бештау'].
 if(miss.length){showUErr('Не найдены листы: '+miss.join(', '));return;}
 setProgress(60,'Парсим данные...');
 const parsed=parseWorkbook(wb);
+if(APP.uploadType==='final'){
+APP._pendingParsed=parsed;
+_id('upload-prog').style.display='none';
+await openMonthPicker();
+return;
+}
 setProgress(75,'Сохраняем в облако...');
 const now=Date.now();
-if(APP.uploadType==='final'){const lbl=prompt('Метка архива (например: Май 2026):\nФайл сохранится в историю месяцев.','');if(lbl){setProgress(80,'Сохраняем в историю...');await DB.saveHistory(lbl,parsed);}}
 setProgress(85,'Синхронизируем...');
 const saved=await DB.saveData(parsed,'user');
 if(saved){setProgress(95,'Готово!');console.log('Данные сохранены в Supabase');}
@@ -1146,6 +1320,75 @@ setTimeout(closeUpload,1500);
 };
 r.onerror=()=>showUErr('Не удалось прочитать файл');
 r.readAsArrayBuffer(file);
+}
+
+// ═══════════════════════════════════════════════
+// ВЫБОР МЕСЯЦА ДЛЯ АРХИВА (Д: история по месяцам)
+// ═══════════════════════════════════════════════
+const MONTH_NAMES=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+
+async function openMonthPicker(){
+const monthSel=_id('mp-month');
+const yearSel=_id('mp-year');
+monthSel.innerHTML=MONTH_NAMES.map((m,i)=>'<option value="'+(i+1)+'">'+m+'</option>').join('');
+const curYear=new Date().getFullYear();
+const years=[curYear-1,curYear,curYear+1];
+yearSel.innerHTML=years.map(y=>'<option value="'+y+'">'+y+'</option>').join('');
+const now=new Date();
+monthSel.value=now.getMonth()+1;
+yearSel.value=curYear;
+
+// Загружаем существующую историю чтобы подсветить занятые месяцы
+let existing=[];
+try{ existing=await DB.loadHistory(); }catch(e){}
+APP._existingHistoryKeys=existing.map(h=>h.month_key).filter(Boolean);
+
+function updateHint(){
+const key=yearSel.value+'-'+String(monthSel.value).padStart(2,'0');
+const exists=APP._existingHistoryKeys.includes(key);
+_id('mp-existing-hint').style.display=exists?'block':'none';
+// Подсветка в выпадающих списках через стиль option
+Array.from(monthSel.options).forEach(opt=>{
+const k=yearSel.value+'-'+String(opt.value).padStart(2,'0');
+const has=APP._existingHistoryKeys.includes(k);
+opt.textContent=(has?'✓ ':'')+MONTH_NAMES[parseInt(opt.value)-1];
+opt.style.color=has?'#38ffb0':'';
+});
+}
+monthSel.onchange=updateHint;
+yearSel.onchange=updateHint;
+updateHint();
+
+_id('month-picker-modal').classList.add('show');
+}
+
+function closeMonthPicker(){
+_id('month-picker-modal').classList.remove('show');
+APP._pendingParsed=null;
+}
+
+async function confirmMonthAndUpload(){
+const parsed=APP._pendingParsed;
+if(!parsed){closeMonthPicker();return;}
+const month=parseInt(_id('mp-month').value);
+const year=parseInt(_id('mp-year').value);
+const monthKey=year+'-'+String(month).padStart(2,'0');
+const label=MONTH_NAMES[month-1]+' '+year;
+
+closeMonthPicker();
+_id('upload-prog').style.display='block';
+setProgress(80,'Сохраняем в историю...');
+await DB.saveHistory(label,parsed,monthKey);
+
+setProgress(90,'Синхронизируем текущие данные...');
+const now=Date.now();
+const saved=await DB.saveData(parsed,'user');
+if(saved){setProgress(95,'Готово!');}
+try{localStorage.setItem('mx_data',JSON.stringify(parsed));localStorage.setItem('mx_last_upload_ts',String(now));}catch(e){}
+APP.data=parsed;updateLastUploadInfo();renderAll();updateBdayBanner();
+setProgress(100,'✓ Сохранено в архив: '+label);
+setTimeout(closeUpload,1500);
+APP._pendingParsed=null;
 }
 function setProgress(w,msg){_id('upload-fill').style.width=w+'%';_id('upload-status').textContent=msg;}
 function showUErr(msg){_id('upload-err').textContent=msg;_id('upload-err').style.display='block';_id('upload-prog').style.display='none';}
