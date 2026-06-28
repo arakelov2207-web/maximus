@@ -982,7 +982,7 @@ return'<thead><tr><th class="rth-sortable '+thCls('rank')+'" onclick="__rSort_'+
 function buildRows(list){
 return list.map(p=>{
 const rc=rankCls(p.rank);const contact=getContact(p.name);
-const metricCells=METRICS.map((m,i)=>{const c=p.coeffs[i]||0;const pc2=Math.round(c*100);return'<td><div style="display:flex;flex-direction:column;gap:3px">'+pctBadge(pc2,11)+'<div style="height:8px;background:rgba(255,255,255,0.07);border-radius:5px;overflow:hidden;width:75px"><div style="height:100%;width:'+Math.min(pc2,100)+'%;background:'+pctColor(pc2)+';border-radius:4px"></div></div><div style="font-size:9px;color:var(--muted)">место '+(p.places[i]||'—')+'</div></div></td>';}).join('');
+const metricCells=METRICS.map((m,i)=>{const c=p.coeffs[i]||0;const pc2=Math.round(c*100);return'<td><div style="display:flex;flex-direction:column;gap:3px">'+pctBadge(pc2,11)+'<div style="height:8px;background:rgba(255,255,255,0.07);border-radius:5px;overflow:hidden;width:75px"><div style="height:100%;width:'+Math.min(pc2,100)+'%;background:'+pctColor(pc2)+';border-radius:4px"></div></div><div style="font-size:9px;color:var(--white)">место '+(p.places[i]||'—')+'</div></div></td>';}).join('');
 let extraCells='';
 if(isRatingPage){
 const myShops=APP.data.shops.filter(s=>s[k]===p.name);
