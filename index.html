@@ -1423,6 +1423,10 @@ async function handleFileFinal(file){
 if(!file)return;
 if(!file.name.endsWith('.xlsx')){showUErr('Файл должен быть .xlsx');return;}
 if(!_selectedMonth||!_selectedYear){showUErr('Выберите месяц архива');return;}
+// Д30-фикс: захватываем месяц/год СРАЗУ в момент клика (замыкание),
+// чтобы переключение между месяцами во время чтения файла не повлияло на сохранение
+const capturedMonth=_selectedMonth;
+const capturedYear=_selectedYear;
 _id('upload-prog').style.display='block';_id('upload-err').style.display='none';
 setProgress(20,'Читаем файл...');
 const r=new FileReader();
@@ -1434,10 +1438,11 @@ const miss=['Прогноз продаж','Планы сети','Бештау'].
 if(miss.length){showUErr('Не найдены листы: '+miss.join(', '));return;}
 setProgress(60,'Парсим данные...');
 const parsed=parseWorkbook(wb);
-const monthKey=_selectedYear+'-'+String(_selectedMonth).padStart(2,'0');
-const label=MONTH_NAMES[_selectedMonth-1]+' '+_selectedYear;
+const monthKey=capturedYear+'-'+String(capturedMonth).padStart(2,'0');
+const label=MONTH_NAMES[capturedMonth-1]+' '+capturedYear;
 setProgress(80,'Сохраняем в историю...');
-await DB.saveHistory(label,parsed,monthKey);
+const histSaved=await DB.saveHistory(label,parsed,monthKey);
+if(!histSaved){showUErr('Не удалось сохранить в архив (Supabase). Проверьте соединение и попробуйте снова.');return;}
 if(APP._existingHistoryKeys&&!APP._existingHistoryKeys.includes(monthKey)){APP._existingHistoryKeys.push(monthKey);}
 APP._cachedHistoryData=null;
 setProgress(90,'Синхронизируем текущие данные...');
@@ -1446,8 +1451,8 @@ const saved=await DB.saveData(parsed,'user');
 if(saved){setProgress(95,'Готово!');}
 try{localStorage.setItem('mx_data',JSON.stringify(parsed));localStorage.setItem('mx_last_upload_ts',String(now));}catch(e){}
 APP.data=parsed;updateLastUploadInfo();renderAll();updateBdayBanner();
-setProgress(100,'✓ Сохранено в архив: '+label);
-setTimeout(closeUpload,1500);
+setProgress(100,'✓ Сохранено в архив: '+label+' ('+(parsed.shops?.length||0)+' магазинов)');
+setTimeout(closeUpload,1800);
 }catch(err){showUErr('Ошибка: '+err.message);console.error(err);}
 };
 r.onerror=()=>showUErr('Не удалось прочитать файл');
